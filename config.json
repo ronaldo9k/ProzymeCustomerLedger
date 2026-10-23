@@ -25,13 +25,13 @@
       "./DOYEONG_Ledger.jpeg",
       "./DOYEONG_Ledger"
     ],
-    "backgroundOpacity": 0.34,
+    "backgroundOpacity": 0.72,
     "backgroundPosition": "center 26%"
   },
 
   "brand": {
     "appName": "거래처 원장 자동화",
-    "version": "V9.1",
+    "version": "V9.2",
     "fallbackInitial": "PZ",
     "title": "거래처 원장",
     "titleAccent": "확인 후 발송",
@@ -40,7 +40,7 @@
   },
 
   "ui": {
-    "pickerLimit": 60,
+    "pickerLimit": 250,
     "searchDebounceMs": 120,
     "historyLimit": 80,
     "showManualRun": true
