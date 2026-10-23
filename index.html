@@ -4,429 +4,51 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#070a12">
-<title>푸로찜 총판 · 거래처 원장 자동화 V9.0</title>
+<title>거래처 원장 자동화 V9.1</title>
 
-<!-- ★ 파비콘 : 같은 폴더에 두는 이미지를 쓰세요 (예: logo.png) -->
-<link rel="icon" href="./TIGERS.jpg">
-<link rel="apple-touch-icon" href="./TIGERS.jpg">
+<!-- ★ 파비콘 : 같은 폴더의 TIGERS 이미지 -->
+<link rel="icon" href="./TIGERS.JPG">
+<link rel="apple-touch-icon" href="./TIGERS.JPG">
 
-<style>
-/* =========================================================
-   🎨 컬러 토큰 — Prozyme-X-Box-Hero 팔레트 계승
-   ========================================================= */
-:root{
-  --bg:#070a12;
-  --bg2:#0b1020;
-  --ink:#f3f6fb;
-  --ink-dim:#aebacd;
-  --muted:#7b8798;
-  --line:rgba(255,255,255,.10);
-  --line2:rgba(255,255,255,.16);
-  --gold:#c9a227;
-  --gold-lt:#f0d47a;
-  --green:#34d399;
-  --green-dk:#15803d;
-  --blue:#60a5fa;
-  --red:#f87171;
-  --amber:#fbbf24;
-  --card:rgba(255,255,255,.045);
-  --card-hi:rgba(255,255,255,.075);
-  --shadow:0 18px 50px rgba(0,0,0,.45);
-  --radius:18px;
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0}
-body{
-  background:var(--bg);
-  color:var(--ink);
-  font-family:-apple-system,BlinkMacSystemFont,"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
-  line-height:1.6;
-  padding:0 0 70px;
-  overflow-x:hidden;
-}
-
-/* =========================================================
-   🌄 배경 이미지 레이어
-   ---------------------------------------------------------
-   ★ 사용법 : 아래 ./DOYEONG_Ledger 를 실제 이미지 파일명으로 바꾸세요.
-     · ./DOYEONG_Ledger      → 상단 히어로 뒤에 깔리는 대형 배경 (권장 1600×900 이상)
-     · ./bg-glow.png → 화면 전체에 은은하게 깔리는 광원/그라데이션 (선택)
-   이미지가 없어도 그라데이션만으로 정상 동작합니다.
-   ========================================================= */
-.bg-photo{
-  position:fixed; inset:0; z-index:0; pointer-events:none;
-  background-image:url("./DOYEONG_Ledger");
-  background-size:cover;
-  background-position:center 22%;
-  opacity:.30;
-  filter:saturate(.85) contrast(1.05);
-}
-.bg-veil{
-  position:fixed; inset:0; z-index:0; pointer-events:none;
-  background:
-    radial-gradient(900px 520px at 50% -12%, rgba(201,162,39,.20), transparent 62%),
-    radial-gradient(700px 460px at 92% 8%, rgba(96,165,250,.14), transparent 60%),
-    radial-gradient(760px 520px at 4% 22%, rgba(52,211,153,.10), transparent 62%),
-    linear-gradient(180deg, rgba(7,10,18,.72) 0%, rgba(7,10,18,.93) 42%, var(--bg) 78%);
-}
-.bg-grid{
-  position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.28;
-  background-image:
-    linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
-  background-size:56px 56px;
-  mask-image:radial-gradient(circle at 50% 0%, #000 0%, transparent 72%);
-  -webkit-mask-image:radial-gradient(circle at 50% 0%, #000 0%, transparent 72%);
-}
-.wrap{position:relative; z-index:2; max-width:1080px; margin:0 auto; padding:0 16px}
-
-/* =========================================================
-   🏔️ HERO
-   ========================================================= */
-.hero{padding:38px 0 22px; text-align:center}
-.hero-badge{
-  display:inline-flex; align-items:center; gap:7px;
-  padding:6px 14px; border-radius:999px;
-  border:1px solid rgba(201,162,39,.42);
-  background:rgba(201,162,39,.10);
-  color:var(--gold-lt); font-size:12px; font-weight:800; letter-spacing:.4px;
-}
-.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--green);
-  box-shadow:0 0 10px var(--green); animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-
-/* ★ 엠블럼 : ./logo.png 를 원형으로 표시. 이미지 없으면 이니셜 표시 */
-.hero-symbol{
-  width:84px;height:84px;margin:20px auto 14px;border-radius:26px;
-  display:grid;place-items:center;
-  background:linear-gradient(155deg, rgba(201,162,39,.26), rgba(201,162,39,.04));
-  border:1px solid rgba(201,162,39,.45);
-  box-shadow:0 14px 42px rgba(201,162,39,.20), inset 0 1px 0 rgba(255,255,255,.16);
-  overflow:hidden; position:relative;
-}
-.hero-symbol img{width:100%;height:100%;object-fit:cover;display:block}
-.hero-symbol .fallback{
-  font-size:26px;font-weight:900;color:var(--gold-lt);letter-spacing:1px;
-  position:absolute;inset:0;display:grid;place-items:center;
-}
-.hero-symbol.has-img .fallback{display:none}
-
-.hero h1{
-  font-size:clamp(23px,5.4vw,34px); line-height:1.28; margin:0 0 10px;
-  font-weight:900; letter-spacing:-.7px;
-}
-.hero h1 em{
-  font-style:normal;
-  background:linear-gradient(100deg, var(--gold-lt), var(--gold) 55%, #fff2c9);
-  -webkit-background-clip:text; background-clip:text; color:transparent;
-}
-.hero-sub{color:var(--ink-dim); font-size:14px; max-width:620px; margin:0 auto}
-.hero-sub b{color:var(--gold-lt);font-weight:800}
-
-/* 요약 스탯 */
-.hero-stats{
-  display:grid; grid-template-columns:repeat(2,1fr); gap:10px;
-  margin:22px 0 0;
-}
-@media(min-width:720px){ .hero-stats{grid-template-columns:repeat(4,1fr)} }
-.stat{
-  border:1px solid var(--line); border-radius:14px; padding:13px 14px;
-  background:var(--card); text-align:left;
-}
-.stat .k{font-size:11px;color:var(--muted);font-weight:800;letter-spacing:.3px}
-.stat .v{font-size:15px;font-weight:800;margin-top:3px;color:var(--ink)}
-.stat .v.gold{color:var(--gold-lt)}
-.stat .v.green{color:var(--green)}
-
-/* =========================================================
-   🗂️ TABS
-   ========================================================= */
-.tabs{
-  display:flex; gap:6px; overflow-x:auto; padding:6px;
-  border:1px solid var(--line); border-radius:16px;
-  background:rgba(255,255,255,.035); margin:26px 0 18px;
-  scrollbar-width:none;
-}
-.tabs::-webkit-scrollbar{display:none}
-.tab{
-  flex:1 0 auto; min-width:112px; border:0; cursor:pointer;
-  padding:11px 12px; border-radius:11px; background:transparent;
-  color:var(--ink-dim); font-size:13px; font-weight:800; font-family:inherit;
-  transition:.18s; white-space:nowrap;
-}
-.tab:hover{color:var(--ink); background:rgba(255,255,255,.06)}
-.tab.on{
-  background:linear-gradient(160deg, rgba(201,162,39,.95), rgba(168,132,20,.95));
-  color:#1a1405; box-shadow:0 8px 24px rgba(201,162,39,.30);
-}
-
-/* =========================================================
-   🃏 CARD
-   ========================================================= */
-.card{
-  border:1px solid var(--line); border-radius:var(--radius);
-  background:linear-gradient(170deg, var(--card-hi), rgba(255,255,255,.02));
-  box-shadow:var(--shadow); padding:20px; margin-bottom:16px;
-  backdrop-filter:blur(14px);
-}
-.card-title{
-  display:flex; align-items:center; gap:9px; margin:0 0 4px;
-  font-size:15px; font-weight:900; letter-spacing:-.2px;
-}
-.card-title .ico{
-  width:26px;height:26px;border-radius:9px;display:grid;place-items:center;
-  background:rgba(201,162,39,.16); border:1px solid rgba(201,162,39,.34);
-  font-size:13px;
-}
-.card-desc{color:var(--muted); font-size:12.5px; margin:0 0 16px; line-height:1.65}
-
-/* 입력 */
-label.f{display:block; font-size:12px; font-weight:800; color:var(--ink-dim); margin:0 0 7px}
-input,select,textarea{
-  width:100%; padding:12px 13px; font-size:15px; font-family:inherit;
-  border:1px solid var(--line2); border-radius:12px;
-  background:rgba(9,13,22,.72); color:var(--ink); outline:none;
-  transition:.16s;
-}
-textarea{resize:vertical; min-height:64px}
-input::placeholder{color:#5d6879}
-input:focus,select:focus,textarea:focus{
-  border-color:rgba(201,162,39,.72);
-  box-shadow:0 0 0 3px rgba(201,162,39,.14);
-  background:rgba(9,13,22,.92);
-}
-select option{background:#0d1424; color:#f3f6fb}
-input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.65)}
-
-.grid2{display:grid; grid-template-columns:1fr; gap:13px}
-@media(min-width:600px){ .grid2{grid-template-columns:1fr 1fr} }
-.fld{margin-bottom:15px}
-.hint{font-size:11.5px; color:var(--muted); margin-top:6px; line-height:1.6}
-
-/* 버튼 */
-.btns{display:flex; gap:9px; flex-wrap:wrap; margin-top:4px}
-.btn{
-  cursor:pointer; border:1px solid var(--line2); border-radius:12px;
-  padding:12px 17px; font-size:13.5px; font-weight:800; font-family:inherit;
-  background:rgba(255,255,255,.07); color:var(--ink); transition:.16s;
-  display:inline-flex; align-items:center; gap:7px; justify-content:center;
-}
-.btn:hover{background:rgba(255,255,255,.13); transform:translateY(-1px)}
-.btn:active{transform:translateY(0)}
-.btn:disabled{opacity:.45; cursor:not-allowed; transform:none}
-.btn.gold{
-  background:linear-gradient(160deg, var(--gold-lt), var(--gold));
-  color:#1a1405; border-color:transparent;
-  box-shadow:0 10px 28px rgba(201,162,39,.30);
-}
-.btn.gold:hover{filter:brightness(1.06)}
-.btn.ghost{background:transparent}
-.btn.sm{padding:8px 12px; font-size:12px; border-radius:10px}
-
-/* 검색 */
-.search-wrap{position:relative}
-.search-wrap input{padding-left:38px}
-.search-wrap .mag{
-  position:absolute; left:13px; top:50%; transform:translateY(-50%);
-  font-size:14px; opacity:.55; pointer-events:none;
-}
-
-/* 결과 리스트 (거래처 검색) */
-.picker{
-  margin-top:10px; max-height:290px; overflow-y:auto;
-  border:1px solid var(--line); border-radius:13px;
-  background:rgba(6,9,16,.72);
-  display:none;
-}
-.picker.show{display:block}
-.picker-row{
-  display:flex; align-items:center; gap:10px;
-  padding:11px 13px; border-bottom:1px solid rgba(255,255,255,.055);
-  cursor:pointer; transition:.13s;
-}
-.picker-row:last-child{border-bottom:0}
-.picker-row:hover{background:rgba(201,162,39,.10)}
-.picker-row.sel{background:rgba(201,162,39,.17)}
-.picker-row .nm{font-size:13.5px; font-weight:800}
-.picker-row .mt{font-size:11px; color:var(--muted); margin-top:1px}
-.picker-empty{padding:18px; text-align:center; color:var(--muted); font-size:12.5px}
-
-.sel-one{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-  padding:12px 14px; border-radius:12px; margin-top:10px;
-  border:1px solid rgba(201,162,39,.42); background:rgba(201,162,39,.10);
-  font-size:13.5px; font-weight:800;
-}
-.sel-one .x{
-  border:0;background:transparent;color:var(--muted);cursor:pointer;
-  font-size:17px;line-height:1;padding:2px 5px;border-radius:7px;
-}
-.sel-one .x:hover{color:var(--red);background:rgba(248,113,113,.12)}
-
-/* 미리보기 PDF 박스 */
-.preview-box{
-  border:1px solid rgba(96,165,250,.36); border-radius:14px;
-  background:rgba(96,165,250,.075); padding:16px; margin-top:16px;
-}
-.preview-head{
-  display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
-  margin-bottom:12px;
-}
-.preview-head .t{font-size:13.5px; font-weight:900; color:#bfdbfe}
-.kv{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:12px}
-@media(min-width:640px){ .kv{grid-template-columns:repeat(4,1fr)} }
-.kv .box{
-  background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.07);
-  border-radius:10px; padding:9px 11px;
-}
-.kv .box .k{font-size:10.5px; color:var(--muted); font-weight:800}
-.kv .box .v{font-size:13px; font-weight:800; margin-top:2px}
-
-/* 원장 표 */
-.tbl-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;
-  border:1px solid var(--line); border-radius:12px; background:rgba(0,0,0,.24)}
-table{width:100%; border-collapse:collapse; font-size:12.5px; white-space:nowrap}
-th,td{padding:9px 10px; border-bottom:1px solid rgba(255,255,255,.06); text-align:left}
-th{
-  background:rgba(255,255,255,.06); font-size:11px; color:var(--ink-dim);
-  font-weight:800; position:sticky; top:0; backdrop-filter:blur(8px);
-}
-tbody tr:last-child td{border-bottom:0}
-td.num{text-align:right; font-variant-numeric:tabular-nums}
-tr.row-base td{background:rgba(201,162,39,.10); font-weight:800}
-tr.row-pay td{background:rgba(52,211,153,.08)}
-tr.row-sale td{background:rgba(96,165,250,.07)}
-
-/* 배지 */
-.badge{
-  display:inline-block; padding:3px 9px; border-radius:999px;
-  font-size:10.5px; font-weight:900; letter-spacing:.2px; white-space:nowrap;
-}
-.b-wait{background:rgba(251,191,36,.16); color:#fcd34d}
-.b-ok{background:rgba(52,211,153,.16); color:#6ee7b7}
-.b-err{background:rgba(248,113,113,.16); color:#fca5a5}
-.b-off{background:rgba(148,163,184,.15); color:#cbd5e1}
-.b-prev{background:rgba(96,165,250,.18); color:#93c5fd}
-
-/* 요청/이력 리스트 */
-.list{display:flex; flex-direction:column; gap:9px}
-.item{
-  border:1px solid var(--line); border-radius:13px;
-  background:rgba(255,255,255,.032); padding:13px 14px;
-  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
-}
-.item:hover{background:rgba(255,255,255,.055)}
-.item .l{min-width:0; flex:1}
-.item .nm{font-size:13.5px; font-weight:900; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
-.item .sub{font-size:11.5px; color:var(--muted); margin-top:4px; line-height:1.55}
-.item .r{display:flex; align-items:center; gap:7px; flex-shrink:0}
-
-/* PDF 열기 버튼 — ★ 사용자가 가장 좋아한 기능, 강조 유지 */
-.pdf-btn{
-  display:inline-flex; align-items:center; gap:6px;
-  padding:9px 14px; border-radius:11px; text-decoration:none;
-  font-size:12.5px; font-weight:900; cursor:pointer; border:1px solid transparent;
-  background:linear-gradient(160deg, #3b82f6, #1d4ed8); color:#fff;
-  box-shadow:0 8px 22px rgba(37,99,235,.36); transition:.16s;
-}
-.pdf-btn:hover{filter:brightness(1.1); transform:translateY(-1px)}
-.pdf-btn.off{
-  background:rgba(148,163,184,.13); color:#8b98a8; box-shadow:none;
-  border-color:var(--line); cursor:not-allowed; pointer-events:none;
-}
-
-/* 체크리스트 */
-.chk{
-  display:flex; align-items:center; gap:11px; padding:12px 13px;
-  border:1px solid var(--line); border-radius:12px; margin-bottom:8px;
-  background:rgba(255,255,255,.03);
-}
-.chk .box{
-  width:20px;height:20px;border-radius:6px;flex-shrink:0;
-  border:1.5px solid var(--line2); display:grid;place-items:center;
-  font-size:12px; color:transparent;
-}
-.chk.on .box{background:var(--green); border-color:var(--green); color:#052e1a}
-.chk .nm{font-size:13px; font-weight:800; flex:1}
-.chk .meta{font-size:11px; color:var(--muted)}
-
-/* 메시지 */
-.msg{
-  margin-top:13px; padding:12px 14px; border-radius:12px;
-  font-size:12.5px; white-space:pre-wrap; display:none; line-height:1.7;
-}
-.msg.show{display:block}
-.msg.ok{background:rgba(52,211,153,.10); color:#a7f3d0; border:1px solid rgba(52,211,153,.34)}
-.msg.err{background:rgba(248,113,113,.10); color:#fecaca; border:1px solid rgba(248,113,113,.34)}
-.msg.info{background:rgba(96,165,250,.10); color:#bfdbfe; border:1px solid rgba(96,165,250,.34)}
-
-/* 로딩 스피너 */
-.spin{
-  width:14px;height:14px;border-radius:50%;display:inline-block;
-  border:2px solid rgba(255,255,255,.28); border-top-color:#fff;
-  animation:sp .7s linear infinite;
-}
-@keyframes sp{to{transform:rotate(360deg)}}
-
-/* 안내 박스 */
-.note{
-  border-left:3px solid var(--gold); border-radius:0 10px 10px 0;
-  background:rgba(201,162,39,.075); padding:12px 14px;
-  font-size:12.5px; color:var(--ink-dim); line-height:1.75;
-}
-.note b{color:var(--gold-lt)}
-
-/* 상세 설정(접기) */
-details.setup{
-  border:1px solid var(--line); border-radius:13px;
-  background:rgba(255,255,255,.026); padding:0; margin-bottom:16px;
-}
-details.setup>summary{
-  cursor:pointer; padding:13px 15px; font-size:13px; font-weight:900;
-  color:var(--ink-dim); list-style:none; display:flex; align-items:center; gap:8px;
-}
-details.setup>summary::-webkit-details-marker{display:none}
-details.setup>summary::after{content:"▾"; margin-left:auto; color:var(--muted)}
-details.setup[open]>summary::after{content:"▴"}
-details.setup .inner{padding:0 15px 16px}
-
-.foot{color:var(--muted); font-size:11.5px; text-align:center; margin-top:26px; line-height:1.85}
-.foot b{color:var(--ink-dim)}
-.hide{display:none !important}
-</style>
+<link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
-<!-- ================= 배경 레이어 (이미지 교체 지점) ================= -->
+<!-- ================= 배경 3겹 (사진 / 색유리 / 격자) ================= -->
 <div class="bg-photo"></div>
 <div class="bg-veil"></div>
 <div class="bg-grid"></div>
 
 <div class="wrap">
 
-  <!-- ================= HERO ================= -->
+  <!-- ================= 컴팩트 헤더 ================= -->
   <header class="hero">
-    <span class="hero-badge"><span class="dot"></span> 거래처 원장 자동화 V9.0</span>
+    <div class="hero-top">
+      <div class="brand">
+        <div class="brand-sym" id="symbol">
+          <img id="symImg" src="" alt="TIGERS" style="display:none">
+          <span class="fallback" id="symFallback">PZ</span>
+        </div>
+        <div class="brand-txt">
+          <h1 id="brandTitle">거래처 원장 <em>확인 후 발송</em></h1>
+          <p class="brand-sub" id="brandSub">
+            <span id="brandName">거래처 원장 자동화</span>
+            <span class="brand-badge"><span class="dot"></span><span id="brandVer">V9.1</span></span>
+          </p>
+        </div>
+      </div>
 
-    <!-- ★ 엠블럼 : ./logo.png 이미지가 있으면 자동 표시, 없으면 'PZ' 표시 -->
-    <div class="hero-symbol" id="symbol">
-      <img src="./logo.png" alt="" onload="document.getElementById('symbol').classList.add('has-img')"
-           onerror="this.style.display='none'">
-      <span class="fallback">PZ</span>
+      <div class="hero-status">
+        <span class="pill" id="connPill">확인 중…</span>
+      </div>
     </div>
 
-    <h1>거래처 원장, <em>확인하고 보내세요</em></h1>
-    <p class="hero-sub">
-      원장을 먼저 <b>PDF로 눈으로 확인</b>한 뒤, 버튼 한 번으로
-      <b>회사 + 거래처에 동시 발송</b>합니다.
-    </p>
-
-    <div class="hero-stats">
-      <div class="stat"><div class="k">다음 정기 발송</div><div class="v gold" id="stNext">-</div></div>
-      <div class="stat"><div class="k">회사 메일</div><div class="v" id="stHq" style="font-size:12.5px">-</div></div>
-      <div class="stat"><div class="k">거래처 발송</div><div class="v green" id="stClient">-</div></div>
-      <div class="stat"><div class="k">남은 메일 쿼터</div><div class="v" id="stQuota">-</div></div>
+    <!-- 설정 파일 문제 안내 (평소엔 숨김) -->
+    <div class="warn hide" id="cfgWarn">
+      <b>config.json 을 읽지 못했습니다.</b> index.html 과 <code>config.json</code> 이 <b>같은 폴더</b>에 있는지,
+      GitHub 에 <code>config.json</code> 이 올라갔는지 확인하세요. (지금은 내장 기본값으로 동작합니다)
     </div>
+    <div class="warn hide" id="assetWarn"></div>
   </header>
 
   <!-- ================= 탭 ================= -->
@@ -437,29 +59,6 @@ details.setup .inner{padding:0 15px 16px}
     <button class="tab" data-pane="paneHistory">📋 발송 이력</button>
   </nav>
 
-  <!-- ---------- 공통 : 연결 설정 ---------- -->
-  <details class="setup" id="setupBox">
-    <summary>🔗 연결 설정 (최초 1회만)</summary>
-    <div class="inner">
-      <div class="fld">
-        <label class="f">Apps Script 웹앱 주소 (/exec)</label>
-        <input id="cfgUrl" type="url" placeholder="https://script.google.com/macros/s/AKfy.../exec">
-        <div class="hint">Apps Script → 배포 → 웹앱 → 액세스 권한「모든 사용자」로 배포한 뒤 그 /exec 주소를 붙여넣으세요.</div>
-      </div>
-      <div class="fld">
-        <label class="f">토큰 (선택 · GAS의 CFG.WEBAPP_TOKEN 과 동일)</label>
-        <input id="cfgToken" type="text" placeholder="비워두면 검사하지 않습니다">
-      </div>
-      <div class="btns">
-        <button class="btn gold" id="btnConnect">연결 확인</button>
-        <button class="btn ghost" id="btnForget">설정 지우기</button>
-      </div>
-      <div class="hint" style="margin-top:10px">
-        설정은 이 브라우저에만 저장됩니다. 노션 토큰은 서버(Apps Script)에만 있으므로 화면에 노출되지 않습니다.
-      </div>
-    </div>
-  </details>
-
   <!-- ============================================================
        ① 정기 거래처원장
        ============================================================ -->
@@ -467,19 +66,18 @@ details.setup .inner{padding:0 15px 16px}
     <div class="card">
       <h2 class="card-title"><span class="ico">①</span> 정기 거래처원장 (월 마감)</h2>
       <p class="card-desc">
-        노션에서 <b>「정기 거래처원장」</b>이 체크된 거래처 목록입니다.
-        매월 말일 오전 9시에 자동으로 나가며, <b>말일이 주말이면 그 주 금요일</b>에 나갑니다.
-        여기서는 대상 거래처를 확인하고, 필요할 때만 직접 실행합니다.
+        노션에서 <b>「정기 거래처원장」</b>이 체크된 거래처입니다. 매월 말일 오전 9시에 자동 발송되며,
+        말일이 주말이면 직전 금요일에 나갑니다.
       </p>
 
       <div class="note" style="margin-bottom:14px">
-        <b>발송 규칙</b> · 다음 발송일은 <span id="regNext2" style="color:#fff;font-weight:900">-</span> 입니다.
-        말일이 토·일요일이면 <b>직전 금요일</b>에 발송합니다(다음 주 월요일이 아닙니다).
+        <b>다음 자동 발송일</b> · <span id="regNext" style="color:#fff;font-weight:900">-</span>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px" id="regNextNote">-</div>
       </div>
 
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px">
-        <div style="font-size:12.5px;font-weight:900;color:var(--ink-dim)">
-          정기 거래처 체크리스트 <span id="regCount" style="color:var(--gold-lt)">0</span>곳
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px">
+        <div style="font-size:12px;font-weight:900;color:var(--ink-dim)">
+          발송 대상 <span id="regCount" style="color:var(--gold-lt)">0</span>곳
         </div>
         <button class="btn sm ghost" id="btnRegReload">새로고침</button>
       </div>
@@ -488,10 +86,22 @@ details.setup .inner{padding:0 15px 16px}
         <div class="picker-empty">불러오는 중…</div>
       </div>
 
-      <div class="btns" style="margin-top:16px">
-        <button class="btn gold" id="btnRegRun">이번 달 정기 원장 실행</button>
-      </div>
       <div class="msg" id="msgReg"></div>
+
+      <!-- 수동/재발송 : 평소엔 접혀 있음 -->
+      <details class="setup">
+        <summary>⚙️ 수동 발송 (자동 발송을 놓쳤을 때만)</summary>
+        <div class="inner">
+          <div class="note" style="margin-bottom:11px">
+            정상 발송은 <b>말일 오전 9시 자동</b>입니다. 아래 버튼은
+            <b>① 자동 발송이 실패했을 때 ② 말일 이후에 새 거래처를 추가했을 때</b>
+            쓰는 <b>재발송 버튼</b>입니다. 체크된 모든 거래처에 <b>지금 즉시</b> 발송됩니다.
+          </div>
+          <div class="btns">
+            <button class="btn" id="btnRegRun">정기 원장 지금 수동 발송</button>
+          </div>
+        </div>
+      </details>
     </div>
   </section>
 
@@ -502,23 +112,21 @@ details.setup .inner{padding:0 15px 16px}
     <div class="card">
       <h2 class="card-title"><span class="ico">②</span> 당월 거래처원장</h2>
       <p class="card-desc">
-        <b>이번 달 1일 ~ 오늘</b>까지의 원장입니다. 거래처를 검색해 고르고
-        <b>[미리보기]</b>로 PDF를 확인한 뒤 발송하세요.
-        과거 미수금은 건별로 표시됩니다.
+        <b>이번 달 1일 ~ 오늘</b>까지의 원장입니다. 거래처를 골라 <b>[미리보기]</b>로 PDF를 확인한 뒤 발송하세요.
       </p>
 
       <div class="fld">
         <label class="f">거래처 검색</label>
         <div class="search-wrap">
           <span class="mag">🔍</span>
-          <input id="curSearch" type="text" placeholder="거래처명 · 사업자번호 · 이메일로 검색" autocomplete="off">
+          <input id="curSearch" type="text" placeholder="거래처명 · 사업자번호 · 이메일 · 연락처" autocomplete="off">
         </div>
         <div class="picker" id="curPicker"></div>
         <div class="sel-one hide" id="curSel">
           <span id="curSelName">-</span>
           <button class="x" id="curSelX" title="선택 해제">✕</button>
         </div>
-        <div class="hint">노션 거래처 DB를 그대로 불러옵니다. 목록이 비어 있으면 [연결 설정]을 확인하세요.</div>
+        <div class="hint">노션 거래처 DB를 그대로 불러옵니다. <b>가나다 순</b>으로 정렬됩니다.</div>
       </div>
 
       <div class="btns">
@@ -537,7 +145,6 @@ details.setup .inner{padding:0 15px 16px}
       <h2 class="card-title"><span class="ico">③</span> 기간별 거래처원장</h2>
       <p class="card-desc">
         원하는 <b>시작일 ~ 종료일</b>을 넣고 거래처를 고른 뒤 <b>[미리보기]</b>로 확인 → 발송합니다.
-        저장만 해두면 노션에서 <b>「기간별 거래처원장」</b>을 체크하는 것만으로도 실행됩니다.
       </p>
 
       <div class="grid2">
@@ -550,7 +157,7 @@ details.setup .inner{padding:0 15px 16px}
           <input type="date" id="perEnd">
         </div>
       </div>
-      <div class="btns" style="margin:-4px 0 15px">
+      <div class="btns" style="margin:-4px 0 13px">
         <button class="btn sm ghost" data-range="thisMonth">이번 달</button>
         <button class="btn sm ghost" data-range="lastMonth">지난 달</button>
         <button class="btn sm ghost" data-range="last30">최근 30일</button>
@@ -561,7 +168,7 @@ details.setup .inner{padding:0 15px 16px}
         <label class="f">거래처 검색</label>
         <div class="search-wrap">
           <span class="mag">🔍</span>
-          <input id="perSearch" type="text" placeholder="거래처명 · 사업자번호 · 이메일로 검색" autocomplete="off">
+          <input id="perSearch" type="text" placeholder="거래처명 · 사업자번호 · 이메일 · 연락처" autocomplete="off">
         </div>
         <div class="picker" id="perPicker"></div>
         <div class="sel-one hide" id="perSel">
@@ -574,8 +181,7 @@ details.setup .inner{padding:0 15px 16px}
         <label class="f">메모 (선택)</label>
         <input type="text" id="perMemo" placeholder="예: 업체 요청 9월분 / 재발송 요청">
         <div class="hint">
-          이 메모는 <b>원장 PDF에는 나가지 않습니다.</b> 구글시트 「기간별 원장 설정」 탭의 J열에 기록되어
-          “왜 이 원장을 만들었는지”를 나중에 확인하는 용도입니다. 비워도 됩니다.
+          이 메모는 <b>원장 PDF에는 나가지 않습니다.</b> 구글시트 「기간별 원장 설정」 J열에 기록됩니다.
         </div>
       </div>
 
@@ -598,7 +204,7 @@ details.setup .inner{padding:0 15px 16px}
         지금까지 만든 원장과 발송 결과입니다. <b>[PDF 열기]</b>로 언제든 원본을 다시 볼 수 있습니다.
       </p>
 
-      <div class="grid2" style="margin-bottom:14px">
+      <div class="grid2" style="margin-bottom:12px">
         <div class="fld" style="margin:0">
           <label class="f">원장 종류</label>
           <select id="hisMode">
@@ -617,7 +223,7 @@ details.setup .inner{padding:0 15px 16px}
         </div>
       </div>
 
-      <div class="btns" style="margin-bottom:14px">
+      <div class="btns" style="margin-bottom:12px">
         <button class="btn gold" id="btnHisLoad">불러오기</button>
       </div>
 
@@ -629,581 +235,12 @@ details.setup .inner{padding:0 15px 16px}
   </section>
 
   <div class="foot">
-    <b>푸로찜 총판 · 거래처 원장 자동화 V9.0</b><br>
+    <b id="footName">푸로찜 총판 · 거래처 원장 자동화 V9.1</b><br>
     이 화면은 입력·확인 도구입니다. 실제 계산 · PDF 생성 · 메일 발송은 구글 Apps Script가 처리합니다.
   </div>
 </div>
 
-<script>
-/* =========================================================================
-   ⚙️ 설정 (처음 한 번만)
-   -------------------------------------------------------------------------
-   WEBAPP_URL : Apps Script → 배포 → 웹앱 → /exec 주소
-   TOKEN      : GAS 의 CFG.WEBAPP_TOKEN 과 같은 값 (비우면 검사 안 함)
-   여기 값을 채워두면 [연결 설정]을 열지 않아도 바로 동작합니다.
-   ========================================================================= */
-const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbx1ApZaWu7qX8l2NciEkMtBZTnOIX_Fs8hPogFST705srrjHx1czPde_jGuIKOkmsJG/exec';   // 예: 'https://script.google.com/macros/s/AKfy.../exec'
-const TOKEN      = 'ProzymeCustomerLedger';   // 예: 'prozyme-ledger-2026'
-
-const $  = (id) => document.getElementById(id);
-const $$ = (sel) => Array.from(document.querySelectorAll(sel));
-
-/* ------------------------------ 상태 ------------------------------ */
-const ST = {
-  url: '', token: '',
-  customers: [],
-  cur: null, per: null,
-  connected: false
-};
-
-/* ------------------------- 설정 저장/불러오기 ------------------------- */
-const LS_URL = 'pz_ledger_url', LS_TOK = 'pz_ledger_token';
-
-function loadCfg() {
-  let u = WEBAPP_URL, t = TOKEN;
-  try {
-    u = localStorage.getItem(LS_URL) || u;
-    t = localStorage.getItem(LS_TOK) || t;
-  } catch (e) { /* 사생활 보호 모드 등 */ }
-  ST.url = (u || '').trim();
-  ST.token = (t || '').trim();
-  $('cfgUrl').value = ST.url;
-  $('cfgToken').value = ST.token;
-  $('setupBox').open = !ST.url || ST.url.indexOf('여기에') >= 0;
-}
-function saveCfg(u, t) {
-  ST.url = (u || '').trim();
-  ST.token = (t || '').trim();
-  try {
-    localStorage.setItem(LS_URL, ST.url);
-    localStorage.setItem(LS_TOK, ST.token);
-  } catch (e) { /* 무시 */ }
-}
-
-/* ---------------------------- 공통 유틸 ---------------------------- */
-function esc(s) {
-  return String(s == null ? '' : s).replace(/[&<>"']/g, m => (
-    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]
-  ));
-}
-function money(v) {
-  const n = Number(v || 0);
-  return n.toLocaleString('ko-KR') + '원';
-}
-function isoToday() {
-  const d = new Date();
-  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-}
-function isoShift(days) {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-}
-function showMsg(id, text, kind) {
-  const el = $(id);
-  if (!el) return;
-  el.className = 'msg show ' + (kind || 'info');
-  el.textContent = text;
-}
-function hideMsg(id) {
-  const el = $(id);
-  if (el) el.className = 'msg';
-}
-function setBusy(btn, busy, label) {
-  if (!btn) return;
-  if (busy) {
-    btn.dataset.label = btn.dataset.label || btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spin"></span> ' + (label || '처리 중…');
-  } else {
-    btn.disabled = false;
-    if (btn.dataset.label) btn.innerHTML = btn.dataset.label;
-  }
-}
-
-/* ------------------------- GAS 호출 (CORS 회피) ------------------------- */
-/* Content-Type 을 text/plain 으로 보내면 브라우저가 사전확인(OPTIONS)을 하지 않습니다. */
-async function gas(payload, useGet) {
-  if (!ST.url || ST.url.indexOf('여기에') >= 0) {
-    throw new Error('먼저 [연결 설정]에서 Apps Script 웹앱 주소(/exec)를 넣어주세요.');
-  }
-  const body = Object.assign({}, payload);
-  if (ST.token) body.token = ST.token;
-
-  if (useGet) {
-    const qs = new URLSearchParams(body).toString();
-    const res = await fetch(ST.url + '?' + qs, { method: 'GET' });
-    const txt = await res.text();
-    try { return JSON.parse(txt); }
-    catch (e) { throw new Error('응답을 해석하지 못했습니다. 주소(/exec)와 배포 권한을 확인하세요.\n' + txt.slice(0, 180)); }
-  }
-
-  const res = await fetch(ST.url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(body),
-    redirect: 'follow'
-  });
-  const txt = await res.text();
-  try { return JSON.parse(txt); }
-  catch (e) {
-    throw new Error('응답을 해석하지 못했습니다. 주소(/exec)와 배포 권한(모든 사용자)을 확인하세요.\n' + txt.slice(0, 180));
-  }
-}
-
-/* ------------------------- 연결 확인 + 상태 표시 ------------------------- */
-async function connect(silent) {
-  const btn = $('btnConnect');
-  if (!silent) setBusy(btn, true, '확인 중');
-  try {
-    const out = await gas({ action: 'ping' });
-    if (!out.ok) throw new Error(out.error || '연결 실패');
-    ST.connected = true;
-    $('stNext').textContent = (out.nextRegular || '-').replace(/-/g, '.') + (out.weekendShift ? ' (금)' : '');
-    $('regNext2').textContent = (out.nextRegular || '-').replace(/-/g, '.')
-      + (out.weekendShift ? '  (말일이 주말이라 직전 금요일)' : '  (말일이 평일)');
-    $('stHq').textContent = out.hq || '-';
-    $('stClient').textContent = out.sendToClient ? '동시 발송 ON' : 'OFF (회사만)';
-    $('stQuota').textContent = (out.quota || '-') + '건';
-    if (!silent) showMsg('msgReg', '연결 성공 · ' + (out.service || '') + ' / 서버시각 ' + (out.now || ''), 'ok');
-    return out;
-  } catch (e) {
-    ST.connected = false;
-    if (!silent) showMsg('msgReg', e.message, 'err');
-    return null;
-  } finally {
-    if (!silent) setBusy(btn, false);
-  }
-}
-
-/* --------------------------- 거래처 검색 UI --------------------------- */
-function renderPicker(pickerEl, selEl, selNameEl, list, onPick) {
-  if (!list.length) {
-    pickerEl.innerHTML = '<div class="picker-empty">검색 결과가 없습니다.</div>';
-    pickerEl.classList.add('show');
-    return;
-  }
-  pickerEl.innerHTML = list.slice(0, 60).map(c => {
-    const bits = [];
-    if (c.bizNo) bits.push(c.bizNo);
-    if (c.email) bits.push(c.email);
-    const flags = [];
-    if (c.isRegular) flags.push('정기');
-    if (c.isCurrent) flags.push('당월');
-    if (c.isPeriod) flags.push('기간');
-    return `<div class="picker-row" data-id="${esc(c.id)}" data-name="${esc(c.name)}">
-      <div style="flex:1;min-width:0">
-        <div class="nm">${esc(c.name)}</div>
-        <div class="mt">${esc(bits.join(' · ') || '정보 없음')}${flags.length ? ' &nbsp;·&nbsp; ' + flags.join('/') : ''}</div>
-      </div>
-      <span style="color:var(--muted);font-size:15px">›</span>
-    </div>`;
-  }).join('');
-
-  Array.from(pickerEl.children).forEach(row => {
-    row.addEventListener('click', () => {
-      const id = row.dataset.id, name = row.dataset.name;
-      pickerEl.classList.remove('show');
-      selEl.classList.remove('hide');
-      selNameEl.textContent = name;
-      onPick({ id, name });
-    });
-  });
-  pickerEl.classList.add('show');
-}
-
-/* 디바운스 검색 (GAS 왕복을 줄이기 위해 로컬 필터 우선) */
-function localFilter(q) {
-  const s = String(q || '').trim().toLowerCase();
-  if (!s) return ST.customers.slice(0, 60);
-  const digits = s.replace(/[^0-9]/g, '');
-  return ST.customers.filter(c => {
-    const nm = String(c.name || '').toLowerCase();
-    const bn = String(c.bizNo || '').replace(/[^0-9]/g, '');
-    const em = String(c.email || '').toLowerCase();
-    return nm.indexOf(s) >= 0
-      || (digits && bn.indexOf(digits) >= 0)
-      || em.indexOf(s) >= 0;
-  });
-}
-
-async function ensureCustomers() {
-  if (ST.customers.length) return ST.customers;
-  const out = await gas({ action: 'customers' });
-  if (!out.ok) throw new Error(out.error || '거래처 목록을 불러오지 못했습니다.');
-  ST.customers = out.customers || [];
-  return ST.customers;
-}
-
-/* ---------------------------- 미리보기 카드 ---------------------------- */
-/* ★ 사용자가 가장 좋아한 "PDF 열기" 버튼을 가장 크고 선명하게 유지 */
-function renderPreview(slotEl, msgId, d, ctx) {
-  const modeLabel = d.mode === '정기' ? '① 정기 거래처원장'
-    : (d.mode === '당월' ? '② 당월 거래처원장' : '③ 기간별 거래처원장');
-  const rows = (d.rows || []).map(r => {
-    let cls = '';
-    if (r.sales !== '' && r.sales !== null) cls = 'row-sale';
-    else if (r.pay !== '' && r.pay !== null) cls = 'row-pay';
-    else if (r.content && (r.content.indexOf('미수금') >= 0 || r.content.indexOf('선수금') >= 0)) cls = 'row-base';
-    return `<tr class="${cls}">
-      <td>${esc(r.date)}</td>
-      <td>${esc(r.content)}</td>
-      <td class="num">${r.qty === '' ? '' : esc(r.qty)}</td>
-      <td class="num">${r.sales === '' ? '' : Number(r.sales).toLocaleString('ko-KR')}</td>
-      <td class="num">${r.pay === '' ? '' : Number(r.pay).toLocaleString('ko-KR')}</td>
-      <td class="num"><b>${r.balance === '' ? '' : Number(r.balance).toLocaleString('ko-KR')}</b></td>
-      <td>${esc(r.note)}</td>
-    </tr>`;
-  }).join('');
-
-  const mailTo = d.to || '';
-  const mailCc = d.cc ? ' / 참조 ' + d.cc : '';
-
-  slotEl.innerHTML = `
-    <div class="preview-box">
-      <div class="preview-head">
-        <div class="t">📄 원장 미리보기 · ${esc(modeLabel)} · ${esc(d.customer.name)}</div>
-        <div style="display:flex;gap:7px;flex-wrap:wrap">
-          <a class="pdf-btn" href="${esc(d.pdfUrl)}" target="_blank" rel="noopener">📄 PDF 열기</a>
-        </div>
-      </div>
-
-      <div class="kv">
-        <div class="box"><div class="k">기간</div><div class="v" style="font-size:11.5px">${esc(d.startIso)} ~ ${esc(d.endIso)}</div></div>
-        <div class="box"><div class="k">과거 미수 (${esc((d.asOfIso || '').slice(5).replace('-', '.'))} 기준)</div><div class="v">${d.historyCount}건 · ${money(d.openingBalance)}</div></div>
-        <div class="box"><div class="k">기간 내 거래</div><div class="v">${d.currentCount}건</div></div>
-        <div class="box"><div class="k">최종 미수 잔액</div><div class="v" style="color:var(--gold-lt)">${money(d.closingBalance)}</div></div>
-      </div>
-
-      ${d.collapsed ? `<div class="note" style="margin-bottom:12px">거래 건수가 양식(13행)을 넘어 일부를 자동 축약했습니다 — ${esc(d.collapseNote || '')}</div>` : ''}
-
-      <div class="tbl-scroll" style="margin-bottom:14px">
-        <table>
-          <thead><tr><th>일자</th><th>내용</th><th style="text-align:right">수량</th>
-            <th style="text-align:right">판매금</th><th style="text-align:right">입금액</th>
-            <th style="text-align:right">잔액</th><th>비고</th></tr></thead>
-          <tbody>${rows || '<tr><td colspan="7" style="color:var(--muted)">기간 내 거래가 없습니다.</td></tr>'}</tbody>
-        </table>
-      </div>
-
-      <div class="note" style="margin-bottom:14px">
-        <b>받는사람</b> ${esc(mailTo)}${esc(mailCc)}<br>
-        위 PDF를 먼저 확인하세요. 이상이 없으면 아래 <b>[회사+거래처 발송]</b>을 누르면 그 순간 발송됩니다.
-      </div>
-
-      <div class="btns">
-        <button class="btn gold" data-approve="${esc(d.token)}">✅ 회사+거래처 발송</button>
-        <button class="btn ghost" data-discard="${esc(d.token)}">취소 (발송 안 함)</button>
-      </div>
-    </div>`;
-
-  /* 승인 / 취소 이벤트 */
-  slotEl.querySelectorAll('[data-approve]').forEach(b => {
-    b.addEventListener('click', async () => {
-      if (!confirm('이 원장을 회사와 거래처에 지금 발송할까요?\n발송 후에는 취소할 수 없습니다.')) return;
-      setBusy(b, true, '발송 중');
-      try {
-        const out = await gas({ action: 'send', token: b.dataset.approve });
-        if (!out.ok) throw new Error(out.error || '발송 실패');
-        showMsg(msgId, '✅ 발송 완료 → ' + out.to + (out.cc ? '  (참조 ' + out.cc + ')' : ''), 'ok');
-        slotEl.innerHTML = '';
-        loadHistory();
-        if (ctx && ctx.after) ctx.after();
-      } catch (e) {
-        showMsg(msgId, e.message, 'err');
-        setBusy(b, false);
-      }
-    });
-  });
-  slotEl.querySelectorAll('[data-discard]').forEach(b => {
-    b.addEventListener('click', async () => {
-      if (!confirm('이 미리보기를 취소할까요? (발송되지 않습니다)')) return;
-      try {
-        await gas({ action: 'discard', token: b.dataset.discard });
-        showMsg(msgId, '취소했습니다. 발송되지 않았습니다.', 'info');
-        slotEl.innerHTML = '';
-        loadHistory();
-      } catch (e) { showMsg(msgId, e.message, 'err'); }
-    });
-  });
-}
-
-/* =========================== ① 정기 탭 =========================== */
-async function loadRegular() {
-  const box = $('regList');
-  box.innerHTML = '<div class="picker-empty">불러오는 중…</div>';
-  try {
-    const out = await gas({ action: 'regular' });
-    if (!out.ok) throw new Error(out.error || '불러오기 실패');
-    const d = out.data || {};
-    $('regNext2').textContent = (d.nextRunIso || '-').replace(/-/g, '.')
-      + (d.weekendShift ? '  (말일 ' + String(d.monthEndIso || '').replace(/-/g, '.') + ' 이 주말 → 직전 금요일)' : '  (말일이 평일)');
-    $('stNext').textContent = (d.nextRunIso || '-').replace(/-/g, '.') + (d.weekendShift ? ' (금)' : '');
-
-    const list = d.list || [];
-    $('regCount').textContent = list.length;
-    if (!list.length) {
-      box.innerHTML = '<div class="picker-empty">노션에서 「정기 거래처원장」이 체크된 거래처가 없습니다.</div>';
-      return;
-    }
-    box.innerHTML = list.map(c => `
-      <div class="chk on">
-        <div class="box">✓</div>
-        <div style="flex:1;min-width:0">
-          <div class="nm">${esc(c.name)}</div>
-          <div class="meta">${esc(c.email || '이메일 없음')}${c.lastSent ? ' · 최근 발송 ' + esc(c.lastSent) : ' · 발송 이력 없음'}</div>
-        </div>
-      </div>`).join('');
-  } catch (e) {
-    box.innerHTML = '<div class="picker-empty" style="color:#fca5a5">' + esc(e.message) + '</div>';
-  }
-}
-
-/* =========================== ② 당월 탭 =========================== */
-function initCurrent() {
-  const input = $('curSearch'), picker = $('curPicker'), sel = $('curSel'), selName = $('curSelName');
-  let timer = null;
-
-  input.addEventListener('input', () => {
-    clearTimeout(timer);
-    timer = setTimeout(async () => {
-      try { await ensureCustomers(); } catch (e) { showMsg('msgCur', e.message, 'err'); return; }
-      renderPicker(picker, sel, selName, localFilter(input.value), c => { ST.cur = c; input.value = c.name; });
-    }, 150);
-  });
-  input.addEventListener('focus', async () => {
-    try { await ensureCustomers(); } catch (e) { return; }
-    renderPicker(picker, sel, selName, localFilter(input.value), c => { ST.cur = c; input.value = c.name; });
-  });
-  $('curSelX').addEventListener('click', () => {
-    ST.cur = null; sel.classList.add('hide'); input.value = '';
-  });
-
-  $('btnCurPreview').addEventListener('click', async () => {
-    const btn = $('btnCurPreview');
-    hideMsg('msgCur');
-    if (!ST.cur) { showMsg('msgCur', '거래처를 먼저 검색해서 선택하세요.', 'err'); return; }
-    setBusy(btn, true, '원장 만드는 중');
-    try {
-      const out = await gas({ action: 'preview', mode: '당월', customerId: ST.cur.id });
-      if (!out.ok) throw new Error(out.error || '미리보기 실패');
-      renderPreview($('curPreviewSlot'), 'msgCur', out, { after: loadRegular });
-      showMsg('msgCur', 'PDF를 먼저 확인한 뒤 [회사+거래처 발송]을 누르세요. (아직 발송되지 않았습니다)', 'info');
-    } catch (e) {
-      showMsg('msgCur', e.message, 'err');
-    } finally { setBusy(btn, false); }
-  });
-}
-
-/* =========================== ③ 기간별 탭 =========================== */
-function initPeriod() {
-  const input = $('perSearch'), picker = $('perPicker'), sel = $('perSel'), selName = $('perSelName');
-  let timer = null;
-
-  input.addEventListener('input', () => {
-    clearTimeout(timer);
-    timer = setTimeout(async () => {
-      try { await ensureCustomers(); } catch (e) { showMsg('msgPer', e.message, 'err'); return; }
-      renderPicker(picker, sel, selName, localFilter(input.value), c => { ST.per = c; input.value = c.name; });
-    }, 150);
-  });
-  input.addEventListener('focus', async () => {
-    try { await ensureCustomers(); } catch (e) { return; }
-    renderPicker(picker, sel, selName, localFilter(input.value), c => { ST.per = c; input.value = c.name; });
-  });
-  $('perSelX').addEventListener('click', () => {
-    ST.per = null; sel.classList.add('hide'); input.value = '';
-  });
-
-  /* 빠른 기간 버튼 */
-  $$('[data-range]').forEach(b => {
-    b.addEventListener('click', () => {
-      const t = isoToday();
-      const y = Number(t.slice(0, 4)), m = Number(t.slice(5, 7));
-      const pad = n => String(n).padStart(2, '0');
-      const r = b.dataset.range;
-      let s = '', e = t;
-      if (r === 'thisMonth') { s = y + '-' + pad(m) + '-01'; }
-      else if (r === 'lastMonth') {
-        const ly = m === 1 ? y - 1 : y, lm = m === 1 ? 12 : m - 1;
-        s = ly + '-' + pad(lm) + '-01';
-        e = ly + '-' + pad(lm) + '-' + pad(new Date(ly, lm, 0).getDate());
-      } else if (r === 'last30') { s = isoShift(-30); }
-      else if (r === 'thisQuarter') {
-        const qm = Math.floor((m - 1) / 3) * 3 + 1;
-        s = y + '-' + pad(qm) + '-01';
-      }
-      $('perStart').value = s;
-      $('perEnd').value = e;
-    });
-  });
-
-  function collect() {
-    const startIso = $('perStart').value;
-    const endIso = $('perEnd').value;
-    if (!ST.per) throw new Error('거래처를 먼저 검색해서 선택하세요.');
-    if (!startIso || !endIso) throw new Error('시작일과 종료일을 모두 넣으세요.');
-    if (startIso > endIso) throw new Error('시작일이 종료일보다 늦습니다.');
-    return { customerId: ST.per.id, customerName: ST.per.name, startIso, endIso, memo: $('perMemo').value };
-  }
-
-  $('btnPerPreview').addEventListener('click', async () => {
-    const btn = $('btnPerPreview');
-    hideMsg('msgPer');
-    let p;
-    try { p = collect(); } catch (e) { showMsg('msgPer', e.message, 'err'); return; }
-    setBusy(btn, true, '원장 만드는 중');
-    try {
-      const out = await gas(Object.assign({ action: 'preview', mode: '기간' }, p));
-      if (!out.ok) throw new Error(out.error || '미리보기 실패');
-      renderPreview($('perPreviewSlot'), 'msgPer', out, { after: loadRegular });
-      showMsg('msgPer', 'PDF를 먼저 확인한 뒤 [회사+거래처 발송]을 누르세요. (아직 발송되지 않았습니다)', 'info');
-    } catch (e) {
-      showMsg('msgPer', e.message, 'err');
-    } finally { setBusy(btn, false); }
-  });
-
-  $('btnPerSave').addEventListener('click', async () => {
-    const btn = $('btnPerSave');
-    hideMsg('msgPer');
-    let p;
-    try { p = collect(); } catch (e) { showMsg('msgPer', e.message, 'err'); return; }
-    setBusy(btn, true, '저장 중');
-    try {
-      const out = await gas(Object.assign({ action: 'set' }, p));
-      if (!out.ok) throw new Error(out.error || '저장 실패');
-      showMsg('msgPer', '저장했습니다. 이제 노션에서 「기간별 거래처원장」을 체크하면 1분 안에 실행됩니다.\n'
-        + '(또는 위 [미리보기]로 바로 확인하셔도 됩니다)', 'ok');
-      loadHistory();
-    } catch (e) {
-      showMsg('msgPer', e.message, 'err');
-    } finally { setBusy(btn, false); }
-  });
-}
-
-/* =========================== 📋 이력 탭 =========================== */
-function statusBadge(text) {
-  const t = String(text || '');
-  if (t.indexOf('성공') === 0) return '<span class="badge b-ok">발송완료</span>';
-  if (t.indexOf('미리보기') === 0) return '<span class="badge b-prev">승인대기</span>';
-  if (t.indexOf('실패') === 0 || t.indexOf('오류') === 0) return '<span class="badge b-err">오류</span>';
-  if (t.indexOf('건너뜀') === 0) return '<span class="badge b-off">건너뜀</span>';
-  return '<span class="badge b-wait">대기</span>';
-}
-
-async function loadHistory() {
-  const box = $('hisList');
-  const kind = $('hisKind').value;
-  const mode = $('hisMode').value;
-  box.innerHTML = '<div class="picker-empty">불러오는 중…</div>';
-  try {
-    if (kind === 'pending') {
-      const out = await gas({ action: 'pending' });
-      if (!out.ok) throw new Error(out.error || '불러오기 실패');
-      const rows = (out.rows || []).filter(r => !mode || r.mode === mode);
-      if (!rows.length) {
-        box.innerHTML = '<div class="picker-empty">승인 대기 중인 원장이 없습니다.</div>';
-        return;
-      }
-      box.innerHTML = rows.map(r => `
-        <div class="item">
-          <div class="l">
-            <div class="nm">${esc(r.name)} ${statusBadge(r.status === '승인대기' ? '미리보기' : r.status)}</div>
-            <div class="sub">${esc(r.mode)} · ${esc(r.startIso)} ~ ${esc(r.endIso)}<br>
-              최종 미수 ${money(r.closing)} · ${esc(r.email || '이메일 없음')}</div>
-          </div>
-          <div class="r">
-            <a class="pdf-btn ${r.pdfUrl ? '' : 'off'}" href="${esc(r.pdfUrl || '#')}" target="_blank" rel="noopener">📄 PDF 열기</a>
-          </div>
-        </div>`).join('');
-      return;
-    }
-
-    const out = await gas({ action: 'history', limit: 80, mode: mode });
-    if (!out.ok) throw new Error(out.error || '불러오기 실패');
-    const rows = out.rows || [];
-    if (!rows.length) {
-      box.innerHTML = '<div class="picker-empty">발송 이력이 없습니다.</div>';
-      return;
-    }
-    box.innerHTML = rows.map(r => `
-      <div class="item">
-        <div class="l">
-          <div class="nm">${esc(r.name)} ${statusBadge(r.result)}
-            <span class="badge b-off">${esc(r.mode)}</span></div>
-          <div class="sub">${esc(r.startIso)} ~ ${esc(r.endIso)} · ${esc(r.at)}<br>
-            최종 미수 ${money(r.closing)} · 받는사람 ${esc(r.recipient || '-')}</div>
-        </div>
-        <div class="r">
-          <a class="pdf-btn ${r.pdfUrl ? '' : 'off'}" href="${esc(r.pdfUrl || '#')}" target="_blank" rel="noopener">📄 PDF 열기</a>
-        </div>
-      </div>`).join('');
-  } catch (e) {
-    box.innerHTML = '<div class="picker-empty" style="color:#fca5a5">' + esc(e.message) + '</div>';
-  }
-}
-
-/* =========================== 탭 전환 =========================== */
-function initTabs() {
-  $$('.tab').forEach(t => {
-    t.addEventListener('click', () => {
-      $$('.tab').forEach(x => x.classList.remove('on'));
-      t.classList.add('on');
-      $$('.pane').forEach(p => p.classList.add('hide'));
-      const pane = $(t.dataset.pane);
-      if (pane) pane.classList.remove('hide');
-      if (t.dataset.pane === 'paneHistory') loadHistory();
-      if (t.dataset.pane === 'paneRegular') loadRegular();
-    });
-  });
-}
-
-/* =========================== 초기화 =========================== */
-(async function init() {
-  loadCfg();
-  initTabs();
-  initCurrent();
-  initPeriod();
-
-  $('perStart').value = isoShift(-30);
-  $('perEnd').value = isoToday();
-
-  $('btnConnect').addEventListener('click', async () => {
-    saveCfg($('cfgUrl').value, $('cfgToken').value);
-    await connect(false);
-    if (ST.connected) { loadRegular(); }
-  });
-  $('btnForget').addEventListener('click', () => {
-    saveCfg('', '');
-    $('cfgUrl').value = ''; $('cfgToken').value = '';
-    ST.customers = [];
-    showMsg('msgReg', '설정을 지웠습니다.', 'info');
-  });
-  $('btnRegReload').addEventListener('click', loadRegular);
-  $('btnHisLoad').addEventListener('click', loadHistory);
-  $('hisKind').addEventListener('change', loadHistory);
-  $('hisMode').addEventListener('change', loadHistory);
-
-  $('btnRegRun').addEventListener('click', async () => {
-    const btn = $('btnRegRun');
-    if (!confirm('이번 달 정기 원장을 지금 실행할까요?\n노션 「정기 거래처원장」이 체크된 모든 거래처에 발송됩니다.')) return;
-    setBusy(btn, true, '실행 중');
-    try {
-      const out = await gas({ action: 'runRegular' });
-      if (!out.ok) throw new Error(out.error || '실행 실패');
-      showMsg('msgReg', out.summary || '실행 완료', out.failed ? 'err' : 'ok');
-      loadRegular();
-    } catch (e) {
-      showMsg('msgReg', e.message, 'err');
-    } finally { setBusy(btn, false); }
-  });
-
-  if (ST.url) {
-    const ok = await connect(true);
-    if (ok) loadRegular();
-  }
-})();
-</script>
+<script src="./app.js"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
