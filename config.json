@@ -1,0 +1,48 @@
+{
+  "_readme": "이 파일 하나만 고치면 화면이 바뀝니다. 수정 후 브라우저 새로고침(F5)만 하세요. 값은 큰따옴표(\") 안에 넣어야 합니다.",
+  "_readme_assets": "이미지 파일은 index.html 과 같은 폴더에 두세요. 대소문자까지 정확히! (GitHub Pages 는 TIGERS.JPG 와 tigers.jpg 를 다른 파일로 봅니다)",
+
+  "webapp": {
+    "url": "https://script.google.com/macros/s/AKfycbx1ApZaWu7qX8l2NciEkMtBZTnOIX_Fs8hPogFST705srrjHx1czPde_jGuIKOkmsJG/exec",
+    "token": "ProzymeCustomerLedger",
+    "timeoutMs": 60000
+  },
+
+  "assets": {
+    "_how": "앞에서부터 순서대로 '불러오기 시도'해서 처음 성공한 파일을 씁니다. 확장자/대소문자가 헷갈리면 후보를 여러 개 넣어두면 됩니다.",
+    "logo": [
+      "./TIGERS.JPG",
+      "./TIGERS.jpg",
+      "./TIGERS.jpeg",
+      "./tigers.jpg",
+      "./TIGERS.png"
+    ],
+    "background": [
+      "./DOYEONG_Ledger.png",
+      "./DOYEONG_Ledger.PNG",
+      "./DOYEONG_Ledger.jpg",
+      "./DOYEONG_Ledger.JPG",
+      "./DOYEONG_Ledger.jpeg",
+      "./DOYEONG_Ledger"
+    ],
+    "backgroundOpacity": 0.34,
+    "backgroundPosition": "center 26%"
+  },
+
+  "brand": {
+    "appName": "거래처 원장 자동화",
+    "version": "V9.1",
+    "fallbackInitial": "PZ",
+    "title": "거래처 원장",
+    "titleAccent": "확인 후 발송",
+    "subtitle": "PDF로 먼저 확인 → 회사·거래처 동시 발송",
+    "footer": "푸로찜 총판 · 거래처 원장 자동화"
+  },
+
+  "ui": {
+    "pickerLimit": 60,
+    "searchDebounceMs": 120,
+    "historyLimit": 80,
+    "showManualRun": true
+  }
+}
