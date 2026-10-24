@@ -47,7 +47,7 @@
   --shadow:0 18px 50px rgba(0,0,0,.45);
   --radius:18px;
   --bg-photo:none;
-  --bg-photo-opacity:.72;
+  --bg-photo-opacity:.96;
   --bg-photo-pos:center 26%;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -74,7 +74,7 @@ body{
     radial-gradient(900px 520px at 50% -12%, rgba(201,162,39,.12), transparent 62%),
     radial-gradient(700px 460px at 92% 8%, rgba(96,165,250,.09), transparent 60%),
     radial-gradient(760px 520px at 4% 22%, rgba(52,211,153,.07), transparent 62%),
-    linear-gradient(180deg, rgba(7,10,18,.18) 0%, rgba(7,10,18,.46) 32%, rgba(7,10,18,.80) 70%, rgba(7,10,18,.96) 100%);
+    linear-gradient(180deg, rgba(7,10,18,.04) 0%, rgba(7,10,18,.12) 32%, rgba(7,10,18,.24) 70%, rgba(7,10,18,.34) 100%);
 }
 .bg-grid{
   position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.16;
@@ -182,7 +182,7 @@ body{
    ========================================================= */
 .card{
   border:1px solid var(--line); border-radius:var(--radius);
-  background:linear-gradient(170deg, rgba(14,20,34,.90), rgba(8,12,21,.86));
+  background:linear-gradient(170deg, rgba(14,20,34,.48), rgba(8,12,21,.40));
   box-shadow:var(--shadow); padding:18px; margin-bottom:14px;
   backdrop-filter:blur(14px);
 }
@@ -198,14 +198,14 @@ label.f{display:block; font-size:11.5px; font-weight:800; color:var(--ink-dim); 
 input,select,textarea{
   width:100%; padding:10px 12px; font-size:14px; font-family:inherit;
   border:1px solid var(--line2); border-radius:11px;
-  background:rgba(9,13,22,.72); color:var(--ink); outline:none; transition:.16s;
+  background:rgba(9,13,22,.34); color:var(--ink); outline:none; transition:.16s;
 }
 textarea{resize:vertical; min-height:60px}
 input::placeholder{color:#5d6879}
 input:focus,select:focus,textarea:focus{
   border-color:rgba(201,162,39,.72);
   box-shadow:0 0 0 3px rgba(201,162,39,.14);
-  background:rgba(9,13,22,.92);
+  background:rgba(9,13,22,.62);
 }
 select option{background:#0d1424; color:#f3f6fb}
 input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.65)}
@@ -344,13 +344,22 @@ tr.row-sale td{background:rgba(96,165,250,.07)}
 .list{display:flex; flex-direction:column; gap:8px}
 .item{
   border:1px solid var(--line); border-radius:12px;
-  background:rgba(255,255,255,.032); padding:12px 13px;
+  background:rgba(255,255,255,.075); padding:12px 13px;
   display:flex; align-items:center; justify-content:space-between; gap:11px; flex-wrap:wrap;
 }
-.item:hover{background:rgba(255,255,255,.055)}
+.item:hover{background:rgba(255,255,255,.12)}
 .item .l{min-width:0; flex:1}
 .item .nm{font-size:13px; font-weight:900; display:flex; align-items:center; gap:7px; flex-wrap:wrap}
 .item .sub{font-size:11px; color:var(--muted); margin-top:3px; line-height:1.5}
+.history-actions{display:flex; align-items:center; gap:7px; flex-wrap:wrap}
+.delete-one,.delete-all{
+  cursor:pointer; border:1px solid rgba(248,113,113,.58); border-radius:9px;
+  background:rgba(127,29,29,.32); color:#fecaca; font-family:inherit;
+  font-size:11px; font-weight:800; line-height:1.2;
+  padding:8px 10px; min-height:34px;
+}
+.delete-one:hover,.delete-all:hover{background:rgba(185,28,28,.48);border-color:rgba(248,113,113,.9)}
+.delete-one:disabled,.delete-all:disabled{opacity:.45;cursor:not-allowed}
 .item .r{display:flex; align-items:center; gap:6px; flex-shrink:0}
 
 .pdf-btn{
@@ -646,6 +655,7 @@ details.setup .inner{padding:0 13px 14px}
 
       <div class="btns" style="margin-bottom:12px">
         <button class="btn gold" id="btnHisLoad">불러오기</button>
+        <button class="delete-all" id="btnHisDeleteAll" type="button">표시 항목 삭제</button>
       </div>
 
       <div id="hisList" class="list">
@@ -666,11 +676,11 @@ details.setup .inner{padding:0 13px 14px}
 /* =========================================================
    거래처 원장 자동화 V9.2 · app.js
    ---------------------------------------------------------
-   · GAS(구글 앱스 스크립트)는 그대로 두고, 이 화면만 새로 만들었습니다.
+   · 기존 화면/업무 기능은 유지하고, 요청된 투명도와 이력 삭제 기능만 추가했습니다.
    · 주소/토큰/이미지 경로는 config.json 에서 읽습니다.
    · GAS 가 실제로 제공하는 action 만 사용합니다:
      ping, customers, preview, send, discard, pending, history,
-     regular, runRegular, clearSent, rows, set, run, unset
+     regular, runRegular, clearSent, deletePending, deleteHistory, rows, set, run, unset
    ========================================================= */
 'use strict';
 
@@ -679,7 +689,7 @@ details.setup .inner{padding:0 13px 14px}
    ------------------------------------------------------------------ */
 const DEFAULTS = {
   webapp: {
-    url: 'https://script.google.com/macros/s/AKfycbx1ApZaWu7qX8l2NciEkMtBZTnOIX_Fs8hPogFST705srrjHx1czPde_jGuIKOkmsJG/exec',
+    url: 'https://script.google.com/macros/s/AKfycbznY0G7qTya2RPXNk_9RqTkWfPvcQj_Z_t-JVgTt9oBWH6GGJWbDgI3rkzRMQPUFw7M/exec',
     token: 'ProzymeCustomerLedger',
     timeoutMs: 60000
   },
@@ -1380,6 +1390,9 @@ function statusBadge(text) {
   return '<span class="badge b-wait">대기</span>';
 }
 
+let currentHistoryRows = [];
+let currentPendingRows = [];
+
 async function loadHistory() {
   const box = $('hisList');
   if (!box) return;
@@ -1391,23 +1404,37 @@ async function loadHistory() {
       const out = await gas({ action: 'pending' });
       if (!out.ok) throw new Error(out.error || '불러오기 실패');
       const rows = (out.rows || []).filter(r => !mode || r.mode === mode);
+      currentPendingRows = rows;
+      currentHistoryRows = [];
+      $('btnHisDeleteAll').textContent = '승인대기 전체 삭제';
+      $('btnHisDeleteAll').disabled = !rows.some(r => r.status === '승인대기');
       if (!rows.length) {
         box.innerHTML = '<div class="picker-empty">승인 대기 중인 원장이 없습니다.</div>';
         return;
       }
-      box.innerHTML = rows.map(r =>
-        '<div class="item"><div class="l">'
+      box.innerHTML = rows.map(r => {
+        const canDelete = r.status === '승인대기';
+        return '<div class="item"><div class="l">'
         + '<div class="nm">' + esc(r.name) + ' ' + statusBadge(r.status === '승인대기' ? '미리보기' : r.status) + '</div>'
         + '<div class="sub">' + esc(r.mode) + ' · ' + esc(r.startIso) + ' ~ ' + esc(r.endIso) + '<br>'
         + '최종 미수 ' + money(r.closing) + ' · ' + esc(r.email || '이메일 없음') + '</div></div>'
-        + '<div class="r"><a class="pdf-btn ' + (r.pdfUrl ? '' : 'off') + '" href="' + esc(r.pdfUrl || '#') + '" target="_blank" rel="noopener">📄 PDF 열기</a></div>'
-        + '</div>').join('');
+        + '<div class="r history-actions"><a class="pdf-btn ' + (r.pdfUrl ? '' : 'off') + '" href="' + esc(r.pdfUrl || '#') + '" target="_blank" rel="noopener">📄 PDF 열기</a>'
+        + (canDelete ? '<button class="delete-one" type="button" data-delete-pending="' + esc(r.token) + '" title="발송 전 미리보기 삭제">✕ 삭제</button>' : '')
+        + '</div></div>';
+      }).join('');
+      box.querySelectorAll('[data-delete-pending]').forEach(btn => {
+        btn.addEventListener('click', () => deletePendingItems([btn.dataset.deletePending], false));
+      });
       return;
     }
 
     const out = await gas({ action: 'history', limit: Number((ST.cfg.ui && ST.cfg.ui.historyLimit) || 80), mode: mode });
     if (!out.ok) throw new Error(out.error || '불러오기 실패');
     const rows = out.rows || [];
+    currentHistoryRows = rows;
+    currentPendingRows = [];
+    $('btnHisDeleteAll').textContent = '표시된 발송 이력 삭제';
+    $('btnHisDeleteAll').disabled = !rows.length;
     if (!rows.length) {
       box.innerHTML = '<div class="picker-empty">발송 이력이 없습니다.</div>';
       return;
@@ -1418,10 +1445,56 @@ async function loadHistory() {
       + ' <span class="badge b-off">' + esc(r.mode) + '</span></div>'
       + '<div class="sub">' + esc(r.startIso) + ' ~ ' + esc(r.endIso) + ' · ' + esc(r.at) + '<br>'
       + '최종 미수 ' + money(r.closing) + ' · 받는사람 ' + esc(r.recipient || '-') + '</div></div>'
-      + '<div class="r"><a class="pdf-btn ' + (r.pdfUrl ? '' : 'off') + '" href="' + esc(r.pdfUrl || '#') + '" target="_blank" rel="noopener">📄 PDF 열기</a></div>'
-      + '</div>').join('');
+      + '<div class="r history-actions"><a class="pdf-btn ' + (r.pdfUrl ? '' : 'off') + '" href="' + esc(r.pdfUrl || '#') + '" target="_blank" rel="noopener">📄 PDF 열기</a>'
+      + '<button class="delete-one" type="button" data-delete-history="' + Number(r.rowIndex || 0) + '" title="발송 이력 행 삭제">✕ 삭제</button>'
+      + '</div></div>').join('');
+    box.querySelectorAll('[data-delete-history]').forEach(btn => {
+      btn.addEventListener('click', () => deleteHistoryItems([Number(btn.dataset.deleteHistory)], false));
+    });
   } catch (e) {
     box.innerHTML = '<div class="picker-empty" style="color:#fca5a5">' + esc(e.message) + '</div>';
+  }
+}
+
+async function deletePendingItems(tokens, bulk) {
+  const uniqueTokens = [...new Set((tokens || []).filter(Boolean))];
+  if (!uniqueTokens.length) return;
+  const prompt = bulk
+    ? '현재 선택된 원장 종류에 표시된 승인대기 미리보기 ' + uniqueTokens.length + '건을 삭제할까요?\n\n아직 발송되지 않은 승인대기 항목만 삭제됩니다.'
+    : '이 승인대기 미리보기를 삭제할까요?\n\n메일은 발송되지 않으며, 해당 대기 항목만 삭제됩니다.';
+  if (!confirm(prompt)) return;
+  const btn = $('btnHisDeleteAll');
+  if (btn) { btn.disabled = true; btn.textContent = '삭제 중…'; }
+  try {
+    const out = await gas({ action: 'deletePending', tokens: uniqueTokens });
+    if (!out.ok) throw new Error(out.error || '승인대기 삭제 실패');
+    showMsg('msgHis', '승인대기 삭제 ' + (out.deleted || 0) + '건' + (out.skipped ? ' · 보호/건너뜀 ' + out.skipped + '건' : ''), 'ok');
+    await loadHistory();
+  } catch (e) {
+    showMsg('msgHis', e.message, 'err');
+  } finally {
+    if (btn) { btn.disabled = false; }
+  }
+}
+
+async function deleteHistoryItems(rowIndexes, bulk) {
+  const rows = [...new Set((rowIndexes || []).map(Number).filter(n => Number.isInteger(n) && n > 1))];
+  if (!rows.length) return;
+  const prompt = bulk
+    ? '현재 화면에 표시된 발송 이력 ' + rows.length + '건을 실행 로그 시트에서 삭제할까요?\n\n이 작업은 실제 발송 이력 기록을 삭제하며 되돌릴 수 없습니다. PDF 파일과 메일은 삭제되지 않습니다.'
+    : '이 발송 이력 기록을 실행 로그 시트에서 삭제할까요?\n\n실제 메일과 PDF 파일은 삭제되지 않지만, 이력 기록은 되돌릴 수 없습니다.';
+  if (!confirm(prompt)) return;
+  const btn = $('btnHisDeleteAll');
+  if (btn) { btn.disabled = true; btn.textContent = '삭제 중…'; }
+  try {
+    const out = await gas({ action: 'deleteHistory', rowIndexes: rows });
+    if (!out.ok) throw new Error(out.error || '발송 이력 삭제 실패');
+    showMsg('msgHis', '발송 이력 기록 삭제 ' + (out.deleted || 0) + '건', 'ok');
+    await loadHistory();
+  } catch (e) {
+    showMsg('msgHis', e.message, 'err');
+  } finally {
+    if (btn) { btn.disabled = false; }
   }
 }
 
@@ -1461,6 +1534,13 @@ function initTabs() {
 
   $('btnRegReload').addEventListener('click', loadRegular);
   $('btnHisLoad').addEventListener('click', loadHistory);
+  $('btnHisDeleteAll').addEventListener('click', () => {
+    if ($('hisKind').value === 'pending') {
+      deletePendingItems(currentPendingRows.filter(r => r.status === '승인대기').map(r => r.token), true);
+    } else {
+      deleteHistoryItems(currentHistoryRows.map(r => Number(r.rowIndex || 0)), true);
+    }
+  });
   $('hisKind').addEventListener('change', loadHistory);
   $('hisMode').addEventListener('change', loadHistory);
 
