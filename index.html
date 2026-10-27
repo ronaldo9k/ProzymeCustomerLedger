@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#070a12">
-<title>거래처 원장 자동화 V9.2</title>
+<title>거래처 원장 자동화 V10.0</title>
 
 <!-- =========================================================
      📱 홈 화면에 앱으로 설치하기 위한 설정 (PWA)
@@ -182,9 +182,9 @@ body{
    ========================================================= */
 .card{
   border:1px solid var(--line); border-radius:var(--radius);
-  background:linear-gradient(170deg, rgba(14,20,34,.48), rgba(8,12,21,.40));
+  background:linear-gradient(170deg, rgba(14,20,34,.10), rgba(8,12,21,.07));
   box-shadow:var(--shadow); padding:18px; margin-bottom:14px;
-  backdrop-filter:blur(14px);
+  backdrop-filter:blur(6px);
 }
 .card-title{display:flex; align-items:center; gap:8px; margin:0 0 3px;
   font-size:14.5px; font-weight:900; letter-spacing:-.2px}
@@ -437,6 +437,83 @@ details.setup .inner{padding:0 13px 14px}
 .hero{ padding:16px 0 8px }
 .picker-row{ padding:11px 13px }
 .picker-row>.nm{ flex:1; min-width:0; font-size:13.5px; font-weight:800 }
+/* =========================================================
+   V10.0 추가분 — ① 바탕사진 최대 노출(카드 거의 완전 투명)
+              ② 주요 버튼 가독성 강화 (글자음영 + 테두리)
+   ========================================================= */
+/* --- 카드/탭/입력 거의 완전 투명 : 바탕사진이 그대로 비치게 --- */
+.tabs{
+  background:rgba(255,255,255,.02);
+  backdrop-filter:blur(3px);
+}
+.picker{
+  background:rgba(6,9,16,.55);
+  backdrop-filter:blur(10px);
+}
+.picker-head{ background:rgba(10,14,24,.86) }
+.item{ background:rgba(0,0,0,.22); backdrop-filter:blur(6px) }
+.item:hover{ background:rgba(0,0,0,.34) }
+.preview-box{ background:rgba(0,0,0,.30); backdrop-filter:blur(8px) }
+.kv .box{ background:rgba(0,0,0,.38) }
+.chk{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
+.tbl-scroll{ background:rgba(0,0,0,.42); backdrop-filter:blur(6px) }
+th{ background:rgba(10,14,24,.92) }
+
+details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
+
+/* --- 주요 버튼 : 음영 글자 + 선명 테두리 + 그림자로 배경 위에서 확실히 구분 --- */
+.btn{
+  text-shadow:0 1px 3px rgba(0,0,0,.85), 0 0 10px rgba(0,0,0,.55);
+  box-shadow:0 6px 18px rgba(0,0,0,.45);
+  backdrop-filter:blur(8px);
+}
+.btn.gold{
+  border:1px solid rgba(255,240,190,.85);
+  box-shadow:0 8px 24px rgba(201,162,39,.40), 0 2px 8px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.55);
+}
+/* 탭 버튼 : 미선택 시에도 글자가 확실히 보이도록 */
+.tab{
+  text-shadow:0 1px 3px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.6);
+  border:1px solid transparent;
+}
+.tab:hover{ border-color:rgba(201,162,39,.45) }
+.tab.on{
+  border:1px solid rgba(255,240,190,.9);
+  text-shadow:0 1px 2px rgba(255,240,190,.35);
+  box-shadow:0 8px 22px rgba(201,162,39,.32), inset 0 1px 0 rgba(255,255,255,.4);
+}
+/* 발송 이력 등 보조 버튼 테두리 강화 */
+.btn.ghost{ border:1px solid rgba(255,255,255,.30); background:rgba(0,0,0,.25) }
+.btn.ghost:hover{ border-color:rgba(201,162,39,.55); background:rgba(0,0,0,.40) }
+.btn.install{ border:1px solid rgba(201,162,39,.60); background:rgba(0,0,0,.30) }
+
+/* --- 매뉴얼 모달 --- */
+.manual-mask{
+  position:fixed; inset:0; z-index:60; display:none;
+  background:rgba(3,5,10,.72); backdrop-filter:blur(6px);
+}
+.manual-mask.show{display:block}
+.manual-box{
+  position:fixed; z-index:61; top:4vh; left:50%; transform:translateX(-50%);
+  width:min(860px, 94vw); max-height:88vh;
+  background:rgba(10,14,24,.96); border:1px solid rgba(201,162,39,.45);
+  border-radius:18px; box-shadow:0 30px 80px rgba(0,0,0,.7);
+  display:none; flex-direction:column; overflow:hidden;
+}
+.manual-box.show{display:flex}
+.manual-head{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:14px 18px; border-bottom:1px solid var(--line);
+  background:rgba(201,162,39,.08);
+}
+.manual-head .t{font-size:14px;font-weight:900;color:var(--gold-lt)}
+.manual-body{overflow-y:auto; padding:6px 22px 22px; font-size:13px; line-height:1.8; color:var(--ink-dim)}
+.manual-body h2{font-size:15px;color:var(--gold-lt);margin:20px 0 8px}
+.manual-body h3{font-size:13.5px;color:var(--ink);margin:16px 0 6px}
+.manual-body code{background:rgba(0,0,0,.4);padding:1px 6px;border-radius:5px;font-size:11.5px;color:#ffe9a8}
+.manual-body b{color:var(--ink)}
+.manual-body li{margin:3px 0}
+
 .btn.install{ border-color:rgba(201,162,39,.45); background:rgba(201,162,39,.12); color:var(--gold-lt) }
 
 </style>
@@ -462,13 +539,14 @@ details.setup .inner{padding:0 13px 14px}
           <h1 id="brandTitle">거래처 원장 <em>확인 후 발송</em></h1>
           <p class="brand-sub" id="brandSub">
             <span id="brandName">거래처 원장 자동화</span>
-            <span class="brand-badge"><span class="dot"></span><span id="brandVer">V9.2</span></span>
+            <span class="brand-badge"><span class="dot"></span><span id="brandVer">V10.0</span></span>
           </p>
         </div>
       </div>
 
       <div class="hero-status">
         <span class="pill" id="connPill">확인 중…</span>
+        <button class="btn sm ghost" id="btnManual" type="button">📖 사용자 매뉴얼</button>
         <button class="btn sm install" id="btnInstall" type="button">📲 홈 화면에 추가</button>
       </div>
     </div>
@@ -561,6 +639,7 @@ details.setup .inner{padding:0 13px 14px}
 
       <div class="btns">
         <button class="btn gold" id="btnCurPreview">미리보기 (PDF 확인)</button>
+        <button class="btn ghost" id="btnCurClearSent" type="button">🔓 발송완료 해제 (당월)</button>
       </div>
       <div id="curPreviewSlot"></div>
       <div class="msg" id="msgCur"></div>
@@ -618,6 +697,7 @@ details.setup .inner{padding:0 13px 14px}
       <div class="btns">
         <button class="btn gold" id="btnPerPreview">미리보기 (PDF 확인)</button>
         <button class="btn" id="btnPerSave">기간만 저장 (노션 체크로 실행)</button>
+        <button class="btn ghost" id="btnPerClearSent" type="button">🔓 발송완료 해제 (기간)</button>
       </div>
       <div id="perPreviewSlot"></div>
       <div class="msg" id="msgPer"></div>
@@ -666,9 +746,19 @@ details.setup .inner{padding:0 13px 14px}
   </section>
 
   <div class="foot">
-    <b id="footName">푸로찜 총판 · 거래처 원장 자동화 V9.2</b><br>
+    <b id="footName">푸로찜 총판 · 거래처 원장 자동화 V10.0</b><br>
     이 화면은 입력·확인 도구입니다. 실제 계산 · PDF 생성 · 메일 발송은 구글 Apps Script가 처리합니다.
   </div>
+</div>
+
+<!-- ================= 📖 사용자 매뉴얼 모달 ================= -->
+<div class="manual-mask" id="manualMask"></div>
+<div class="manual-box" id="manualBox" role="dialog" aria-modal="true">
+  <div class="manual-head">
+    <div class="t">📖 거래처 원장 자동화 · 사용자 매뉴얼</div>
+    <button class="btn sm ghost" id="manualClose" type="button">✕ 닫기</button>
+  </div>
+  <div class="manual-body" id="manualBody">불러오는 중…</div>
 </div>
 
 <!-- ★ app.js 를 이 파일 안으로 합쳤습니다 -->
@@ -689,7 +779,7 @@ details.setup .inner{padding:0 13px 14px}
    ------------------------------------------------------------------ */
 const DEFAULTS = {
   webapp: {
-    url: 'https://script.google.com/macros/s/AKfycbznY0G7qTya2RPXNk_9RqTkWfPvcQj_Z_t-JVgTt9oBWH6GGJWbDgI3rkzRMQPUFw7M/exec',
+    url: 'https://script.google.com/macros/s/AKfycbw9r0qQlQLKMg4V06Obc7GQO7VKWeFMxXzzvFhnsqEf5op5VuNLdo6x1bgzKMSCLCU/exec',
     token: 'ProzymeCustomerLedger',
     timeoutMs: 60000
   },
@@ -1262,7 +1352,10 @@ async function loadRegular() {
     }
     box.innerHTML = list.map(c => {
       const ct = contactOf(c);
-      const meta = [ct.email || '이메일 없음', c.lastSent ? '최근 발송 ' + c.lastSent : '발송 이력 없음'];
+      const dayTxt = (c.regularDay && c.regularDay > 0)
+        ? '매월 ' + c.regularDay + '일 발송' : '말일 자동';
+      const meta = [ct.email || '이메일 없음', dayTxt,
+        c.lastSent ? '최근 발송 ' + c.lastSent : '발송 이력 없음'];
       return '<div class="chk on">'
         + '<div class="box">✓</div>'
         + '<div style="flex:1;min-width:0">'
@@ -1284,6 +1377,20 @@ function initCurrent() {
 
   $('curSelX').addEventListener('click', () => {
     ST.cur = null; ui.sel.classList.add('hide'); ui.input.value = '';
+  });
+
+  /* ★ [V10.0] 발송완료 해제 (당월) */
+  $('btnCurClearSent').addEventListener('click', async () => {
+    if (!ST.cur) { showMsg('msgCur', '거래처를 먼저 검색해서 선택하세요.', 'err'); return; }
+    if (!confirm('[' + (ST.cur.name || '') + '] 거래처의 「당월원장발송완료」 체크를 해제할까요?\n\n해제하면 다시 실행하거나 노션에서 체크할 때 재발송됩니다.')) return;
+    setBusy($('btnCurClearSent'), true, '해제 중');
+    try {
+      const out = await gas({ action: 'clearSentOne', customerId: ST.cur.id, which: 'current' });
+      if (!out.ok) throw new Error(out.error || '해제 실패');
+      showMsg('msgCur', '✅ ' + (out.message || '해제 완료'), 'ok');
+    } catch (e) {
+      showMsg('msgCur', e.message, 'err');
+    } finally { setBusy($('btnCurClearSent'), false); }
   });
 
   $('btnCurPreview').addEventListener('click', async () => {
@@ -1311,6 +1418,20 @@ function initPeriod() {
 
   $('perSelX').addEventListener('click', () => {
     ST.per = null; ui.sel.classList.add('hide'); ui.input.value = '';
+  });
+
+  /* ★ [V10.0] 발송완료 해제 (기간) */
+  $('btnPerClearSent').addEventListener('click', async () => {
+    if (!ST.per) { showMsg('msgPer', '거래처를 먼저 검색해서 선택하세요.', 'err'); return; }
+    if (!confirm('[' + (ST.per.name || '') + '] 거래처의 「기간원장발송완료」 체크를 해제할까요?\n\n해제하면 같은 기간이라도 다시 실행할 수 있습니다.')) return;
+    setBusy($('btnPerClearSent'), true, '해제 중');
+    try {
+      const out = await gas({ action: 'clearSentOne', customerId: ST.per.id, which: 'period' });
+      if (!out.ok) throw new Error(out.error || '해제 실패');
+      showMsg('msgPer', '✅ ' + (out.message || '해제 완료'), 'ok');
+    } catch (e) {
+      showMsg('msgPer', e.message, 'err');
+    } finally { setBusy($('btnPerClearSent'), false); }
   });
 
   $$('[data-range]').forEach(b => {
@@ -1568,6 +1689,73 @@ function initTabs() {
   } else {
     pill('err', '주소 없음');
   }
+})();
+
+/* ==================================================================
+   V10.0 · 📖 사용자 매뉴얼 모달 (상단 버튼 → 열기/닫기)
+   ================================================================== */
+(function initManual(){
+  const btn = $('btnManual');
+  const mask = $('manualMask');
+  const box = $('manualBox');
+  const body = $('manualBody');
+  if (!btn || !mask || !box || !body) return;
+
+  const MANUAL_HTML = [
+    '<h2>1. 거래처 원장 자동화란?</h2>',
+    '노션 <b>입출고 DB</b>의 거래 기록으로 <b>거래처 원장 PDF</b>를 자동으로 만들어',
+    '<b>회사 + 거래처</b>에 동시에 메일 발송해 주는 시스템입니다. 원장 3종이 있습니다.',
+    '<ul>',
+    '<li><b>① 정기 원장</b> — 매월 말일(주말이면 직전 금요일) 오전 9시 자동 발송. 노션 「정기 거래처원장」 체크 거래처 대상.</li>',
+    '<li><b>② 당월 원장</b> — 이번 달 1일 ~ 오늘까지 원장. 노션 「당월 거래처원장」 체크 또는 웹앱에서 실행.</li>',
+    '<li><b>③ 기간별 원장</b> — 원하는 시작일~종료일 직접 지정해서 발송.</li>',
+    '</ul>',
+    '<h2>2. 공통 사용 순서 (②③ 기준)</h2>',
+    '<ol>',
+    '<li><b>거래처 검색</b> → 거래처 선택</li>',
+    '<li><b>[미리보기 (PDF 확인)]</b> → PDF 생성 + 화면에 미리보기 표시</li>',
+    '<li>PDF 이상 없으면 <b>[✅ 회사+거래처 발송]</b> → 그 순간 메일 발송</li>',
+    '<li>취소하려면 <b>[취소 (발송 안 함)]</b></li>',
+    '</ol>',
+    '<h2>3. 자동 실행 (노션 체크 방식)</h2>',
+    '<ul>',
+    '<li><b>② 당월</b> : 노션 「당월 거래처원장」 체크 → 최대 1분 안에 자동 실행 → 성공 시 체크 자동 해제 + 「당월원장발송완료」 체크</li>',
+    '<li><b>③ 기간</b> : 웹앱에서 기간 저장(또는 시트 C·D열 입력) → 노션 「기간별 거래처원장」 체크 → 최대 1분 안에 실행 → 성공 시 체크 해제 + 「기간원장발송완료」 체크</li>',
+    '<li>발송완료 체크가 되어 있으면 <b>중복 발송이 차단</b>됩니다.</li>',
+    '</ul>',
+    '<h2>4. 🔓 발송완료 해제 버튼 (V10.0 신규)</h2>',
+    '재발송하고 싶은데 노션에서 일일이 체크를 풀기 번거로울 때 사용합니다.',
+    '<ul>',
+    '<li><b>② 당월 탭</b> → 거래처 선택 → <b>[🔓 발송완료 해제 (당월)]</b> → 「당월원장발송완료」 해제</li>',
+    '<li><b>③ 기간 탭</b> → 거래처 선택 → <b>[🔓 발송완료 해제 (기간)]</b> → 「기간원장발송완료」 해제</li>',
+    '<li>해제 후 다시 미리보기/실행하면 재발송됩니다.</li>',
+    '</ul>',
+    '<h2>5. 📅 거래처별 정기 발송일 지정 (V10.0 신규)</h2>',
+    '매월 말일이 아니라 <b>특정 날짜(예: 매월 25일)</b>에 발송하고 싶은 거래처가 있을 때:',
+    '<ol>',
+    '<li>노션 <b>거래처 DB</b>에 <b>숫자(Number)</b> 속성을 추가하고 이름을 <code>정기 발송일</code>로 지정</li>',
+    '<li>해당 거래처에 값 입력 (예: <code>25</code>) — 1~28 사이만 인식</li>',
+    '<li>그 거래처는 말일 자동 발송에서 <b>제외</b>되고 지정일 오전 9시에 발송</li>',
+    '<li>그 달에 그 날짜가 없으면(예: 2월 30일) 그 달의 <b>마지막 날</b>에 발송</li>',
+    '<li>값을 비우면 기존대로 말일(주말이면 직전 금요일)에 발송</li>',
+    '</ol>',
+    '<h2>6. 📋 발송 이력</h2>',
+    '발송 이력(실제 나간 것)과 승인 대기(아직 안 나간 것)를 볼 수 있고, <b>[PDF 열기]</b>로 언제든 원본 PDF를 다시 볼 수 있습니다. 삭제 버튼은 이력/대기 항목만 지웁니다(메일 자체는 회수되지 않습니다).',
+    '<h2>7. 자주 묻는 질문</h2>',
+    '<ul>',
+    '<li><b>"해당 미리보기를 찾을 수 없습니다" 가 나와요</b> — 미리보기를 다시 만든 뒤(토큰 갱신) 발송하세요. V10.0 에서는 토큰이 살짝 어긋나도 자동으로 찾아 발송합니다.</li>',
+    '<li><b>메일이 안 와요</b> — 상단 연결 상태가 「연결됨」인지, 받는사람 이메일이 노션에 정확히 들어가 있는지 확인하세요.</li>',
+    '<li><b>기간이 안 보여요</b> — ③ 탭에서 기간 저장 후 노션 체크, 또는 바로 미리보기를 사용하세요.</li>',
+    '</ul>'
+  ].join('');
+
+  body.innerHTML = MANUAL_HTML;
+  const open = () => { mask.classList.add('show'); box.classList.add('show'); };
+  const close = () => { mask.classList.remove('show'); box.classList.remove('show'); };
+  btn.addEventListener('click', open);
+  $('manualClose').addEventListener('click', close);
+  mask.addEventListener('click', close);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 })();
 
 /* ==================================================================
