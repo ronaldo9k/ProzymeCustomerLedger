@@ -3,7 +3,7 @@
   "_readme_assets": "이미지 파일은 index.html 과 같은 폴더에 두세요. 대소문자까지 정확히! (GitHub Pages 는 TIGERS.JPG 와 tigers.jpg 를 다른 파일로 봅니다)",
 
   "webapp": {
-    "url": "https://script.google.com/macros/s/AKfycbx1ApZaWu7qX8l2NciEkMtBZTnOIX_Fs8hPogFST705srrjHx1czPde_jGuIKOkmsJG/exec",
+    "url": "https://script.google.com/macros/s/AKfycbzWWMA_WMYnfXRBY5Q8xORn8cZCe0YBxp33mvwZQh-ew-c21j_Fw99wFqAcSCcF1RIa/exec",
     "token": "ProzymeCustomerLedger",
     "timeoutMs": 60000
   },
