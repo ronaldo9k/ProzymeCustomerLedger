@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#070a12">
-<title>거래처 원장 자동화 V10.2</title>
+<title>거래처 원장 자동화 V10.3</title>
 
 <!-- =========================================================
      📱 홈 화면에 앱으로 설치하기 위한 설정 (PWA)
@@ -362,7 +362,7 @@ tr.row-sale td{background:rgba(96,165,250,.07)}
 .delete-one:disabled,.delete-all:disabled{opacity:.45;cursor:not-allowed}
 .item .r{display:flex; align-items:center; gap:6px; flex-shrink:0}
 
-/* ===== 발송 이력 · 검색/선택 도구 (V10.2) ===== */
+/* ===== 발송 이력 · 검색/선택 도구 (V10.3) ===== */
 .his-tools{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px}
 @media (max-width:780px){ .his-tools{grid-template-columns:repeat(2,minmax(0,1fr))} }
 .his-bar{
@@ -560,7 +560,7 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
           <h1 id="brandTitle">거래처 원장 <em>확인 후 발송</em></h1>
           <p class="brand-sub" id="brandSub">
             <span id="brandName">거래처 원장 자동화</span>
-            <span class="brand-badge"><span class="dot"></span><span id="brandVer">V10.2</span></span>
+            <span class="brand-badge"><span class="dot"></span><span id="brandVer">V10.3</span></span>
           </p>
         </div>
       </div>
@@ -578,7 +578,7 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
       GitHub 에 <code>config.json</code> 이 올라갔는지 확인하세요. (지금은 내장 기본값으로 동작합니다)
     </div>
     <div class="warn hide" id="assetWarn"></div>
-    <!-- ★ [V10.2] 서버(GAS) 배포 버전이 화면과 다르면 여기에 경고가 뜹니다 -->
+    <!-- ★ [V10.3] 서버(GAS) 배포 버전이 화면과 다르면 여기에 경고가 뜹니다 -->
     <div class="warn hide" id="buildWarn"></div>
   </header>
 
@@ -765,7 +765,7 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
         </div>
       </div>
 
-      <!-- ★ [V10.2] 상태 · 날짜 · 검색어 필터 -->
+      <!-- ★ [V10.3] 상태 · 날짜 · 검색어 필터 -->
       <div class="his-tools">
         <div class="fld" style="margin:0">
           <label class="f">상태</label>
@@ -817,7 +817,7 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
   </section>
 
   <div class="foot">
-    <b id="footName">푸로찜 총판 · 거래처 원장 자동화 V10.2</b><br>
+    <b id="footName">푸로찜 총판 · 거래처 원장 자동화 V10.3</b><br>
     이 화면은 입력·확인 도구입니다. 실제 계산 · PDF 생성 · 메일 발송은 구글 Apps Script가 처리합니다.
   </div>
 </div>
@@ -1080,15 +1080,15 @@ async function gas(payload, useGet) {
   }
 }
 
-const EXPECT_BUILD = 'V10.2';
+const EXPECT_BUILD = 'V10.3';
 
-/* ★ [V10.2] 서버(GAS)가 최신 코드로 배포됐는지 확인 — 같은 오류가 반복되는 주범 차단 */
+/* ★ [V10.3] 서버(GAS)가 최신 코드로 배포됐는지 확인 — 같은 오류가 반복되는 주범 차단 */
 function checkBuild(out) {
   const el = $('buildWarn');
   if (!el) return;
   const got = String((out && out.build) || '');
   if (!got) {
-    el.innerHTML = '<b>GAS 서버가 아직 V10.2 로 배포되지 않았습니다.</b> '
+    el.innerHTML = '<b>GAS 서버가 아직 V10.3 로 배포되지 않았습니다.</b> '
       + '지금 화면은 최신인데 서버는 옛 코드를 실행하고 있습니다. '
       + 'Apps Script 편집기에서 <b>[배포 → 배포 관리 → ✏ 수정 → 버전: 새 버전 → 배포]</b> '
       + '를 누른 뒤 이 화면을 새로고침하세요.';
@@ -1882,7 +1882,7 @@ function initTabs() {
   }
 
   $('btnRegReload').addEventListener('click', loadRegular);
-  // ★ [V10.2] 발송 이력 탭 : 검색·날짜·선택삭제·전체삭제 연결을 한 곳에서 처리
+  // ★ [V10.3] 발송 이력 탭 : 검색·날짜·선택삭제·전체삭제 연결을 한 곳에서 처리
   initHistory();
 
   /* 수동 실행(재발송용) — 접힌 영역 안에만 존재 */
