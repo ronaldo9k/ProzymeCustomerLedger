@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#070a12">
-<title>거래처 원장 자동화 V10.0</title>
+<title>거래처 원장 자동화 V10.1</title>
 
 <!-- =========================================================
      📱 홈 화면에 앱으로 설치하기 위한 설정 (PWA)
@@ -32,8 +32,8 @@
 :root{
   --bg:#070a12;
   --ink:#f3f6fb;
-  --ink-dim:#aebacd;
-  --muted:#7b8798;
+  --ink-dim:#f3f6fb;
+  --muted:#ffffff;
   --line:rgba(255,255,255,.10);
   --line2:rgba(255,255,255,.16);
   --gold:#c9a227;
@@ -201,7 +201,7 @@ input,select,textarea{
   background:rgba(9,13,22,.34); color:var(--ink); outline:none; transition:.16s;
 }
 textarea{resize:vertical; min-height:60px}
-input::placeholder{color:#5d6879}
+input::placeholder{color:#f3f6fb}
 input:focus,select:focus,textarea:focus{
   border-color:rgba(201,162,39,.72);
   box-shadow:0 0 0 3px rgba(201,162,39,.14);
@@ -277,7 +277,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.
 .picker-row .nm{font-size:13px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .picker-row .mt{font-size:10.5px; color:var(--muted); margin-top:1px;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.picker-row .mt.none{color:#6b7686; font-style:normal}
+.picker-row .mt.none{color:#ffffff; font-style:normal}
 .picker-row .pr-r{display:flex; gap:4px; flex:0 0 auto}
 .picker-empty{padding:18px; text-align:center; color:var(--muted); font-size:12px}
 
@@ -337,7 +337,7 @@ tr.row-sale td{background:rgba(96,165,250,.07)}
 .b-wait{background:rgba(251,191,36,.16); color:#fcd34d}
 .b-ok{background:rgba(52,211,153,.16); color:#6ee7b7}
 .b-err{background:rgba(248,113,113,.16); color:#fca5a5}
-.b-off{background:rgba(148,163,184,.15); color:#cbd5e1}
+.b-off{background:rgba(148,163,184,.15); color:#ffffff}
 .b-prev{background:rgba(96,165,250,.18); color:#93c5fd}
 
 /* 리스트 아이템 */
@@ -370,7 +370,7 @@ tr.row-sale td{background:rgba(96,165,250,.07)}
   box-shadow:0 8px 20px rgba(37,99,235,.34); transition:.16s;
 }
 .pdf-btn:hover{filter:brightness(1.1); transform:translateY(-1px)}
-.pdf-btn.off{background:rgba(148,163,184,.13); color:#8b98a8; box-shadow:none;
+.pdf-btn.off{background:rgba(148,163,184,.13); color:#ffffff; box-shadow:none;
   border-color:var(--line); cursor:not-allowed; pointer-events:none}
 
 /* 체크리스트 */
@@ -539,7 +539,7 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
           <h1 id="brandTitle">거래처 원장 <em>확인 후 발송</em></h1>
           <p class="brand-sub" id="brandSub">
             <span id="brandName">거래처 원장 자동화</span>
-            <span class="brand-badge"><span class="dot"></span><span id="brandVer">V10.0</span></span>
+            <span class="brand-badge"><span class="dot"></span><span id="brandVer">V10.1</span></span>
           </p>
         </div>
       </div>
@@ -640,6 +640,10 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
       <div class="btns">
         <button class="btn gold" id="btnCurPreview">미리보기 (PDF 확인)</button>
         <button class="btn ghost" id="btnCurClearSent" type="button">🔓 발송완료 해제 (당월)</button>
+        <!-- ★ [V10.1] 중복 무시 — 이미 발송한 원장도 강제로 다시 만들 때 체크 -->
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#f3f6fb;cursor:pointer;user-select:none">
+          <input type="checkbox" id="curForce" style="accent-color:#c9a227;width:16px;height:16px"> 중복 무시
+        </label>
       </div>
       <div id="curPreviewSlot"></div>
       <div class="msg" id="msgCur"></div>
@@ -698,6 +702,10 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
         <button class="btn gold" id="btnPerPreview">미리보기 (PDF 확인)</button>
         <button class="btn" id="btnPerSave">기간만 저장 (노션 체크로 실행)</button>
         <button class="btn ghost" id="btnPerClearSent" type="button">🔓 발송완료 해제 (기간)</button>
+        <!-- ★ [V10.1] 중복 무시 — 같은 기간을 이미 보냈어도 강제로 다시 만들 때 체크 -->
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#f3f6fb;cursor:pointer;user-select:none">
+          <input type="checkbox" id="perForce" style="accent-color:#c9a227;width:16px;height:16px"> 중복 무시
+        </label>
       </div>
       <div id="perPreviewSlot"></div>
       <div class="msg" id="msgPer"></div>
@@ -746,7 +754,7 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
   </section>
 
   <div class="foot">
-    <b id="footName">푸로찜 총판 · 거래처 원장 자동화 V10.0</b><br>
+    <b id="footName">푸로찜 총판 · 거래처 원장 자동화 V10.1</b><br>
     이 화면은 입력·확인 도구입니다. 실제 계산 · PDF 생성 · 메일 발송은 구글 Apps Script가 처리합니다.
   </div>
 </div>
@@ -779,7 +787,7 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
    ------------------------------------------------------------------ */
 const DEFAULTS = {
   webapp: {
-    url: 'https://script.google.com/macros/s/AKfycbw9r0qQlQLKMg4V06Obc7GQO7VKWeFMxXzzvFhnsqEf5op5VuNLdo6x1bgzKMSCLCU/exec',
+    url: 'https://script.google.com/macros/s/AKfycbxsx4jyOIoKD3K4IGbUKG6fGgrjCmqddo9NUQn0FAPhj3rQr_JilWk2yK4Xq3AfsRPJ/exec',
     token: 'ProzymeCustomerLedger',
     timeoutMs: 60000
   },
@@ -973,7 +981,11 @@ async function gas(payload, useGet) {
     throw new Error('config.json 의 webapp.url 에 Apps Script /exec 주소를 넣어 주세요.');
   }
   const body = Object.assign({}, payload);
-  if (ST.token) body.token = ST.token;
+  // ★★★ [V10.1 결정적 버그 수정] ★★★
+  //  예전에는 웹앱 인증토큰도 미리보기 토큰도 똑같이 'token' 이라는 이름을 써서
+  //  웹앱 인증토큰이 미리보기 토큰을 덮어써 버렸습니다.
+  //  → 웹앱 인증토큰은 이제 'wtoken' 이라는 별도 이름으로 보냅니다. (이름 충돌 원천 차단)
+  if (ST.token) body.wtoken = ST.token;
 
   const opt = { method: useGet ? 'GET' : 'POST' };
   let url = ST.url;
@@ -1290,7 +1302,7 @@ function renderPreview(slotEl, msgId, d, ctx) {
     + '<div class="note" style="margin-bottom:13px"><b>받는사람</b> ' + esc(d.to || '') + esc(mailCc)
     +   '<br>위 PDF를 먼저 확인하세요. 이상이 없으면 아래 <b>[회사+거래처 발송]</b>을 누르면 그 순간 발송됩니다.</div>'
     + '<div class="btns">'
-    +   '<button class="btn gold" data-approve="' + esc(d.token) + '">✅ 회사+거래처 발송</button>'
+    +   '<button class="btn gold" data-approve="' + esc(d.token) + '" data-cid="' + esc(d.customer.id || '') + '" data-mode="' + esc(d.mode || '') + '">✅ 회사+거래처 발송</button>'
     +   '<button class="btn ghost" data-discard="' + esc(d.token) + '">취소 (발송 안 함)</button>'
     + '</div>'
     + '</div>';
@@ -1300,7 +1312,7 @@ function renderPreview(slotEl, msgId, d, ctx) {
       if (!confirm('이 원장을 회사와 거래처에 지금 발송할까요?\n발송 후에는 취소할 수 없습니다.')) return;
       setBusy(b, true, '발송 중');
       try {
-        const out = await gas({ action: 'send', token: b.dataset.approve });
+        const out = await gas({ action: 'send', ptok: b.dataset.approve, customerId: b.dataset.cid, mode: b.dataset.mode });
         if (!out.ok) throw new Error(out.error || '발송 실패');
         showMsg(msgId, '✅ 발송 완료 → ' + out.to + (out.cc ? '  (참조 ' + out.cc + ')' : ''), 'ok');
         slotEl.innerHTML = '';
@@ -1316,7 +1328,7 @@ function renderPreview(slotEl, msgId, d, ctx) {
     b.addEventListener('click', async () => {
       if (!confirm('이 미리보기를 취소할까요? (발송되지 않습니다)')) return;
       try {
-        await gas({ action: 'discard', token: b.dataset.discard });
+        await gas({ action: 'discard', ptok: b.dataset.discard });
         showMsg(msgId, '취소했습니다. 발송되지 않았습니다.', 'info');
         slotEl.innerHTML = '';
         loadHistory();
@@ -1399,7 +1411,8 @@ function initCurrent() {
     if (!ST.cur) { showMsg('msgCur', '거래처를 먼저 검색해서 선택하세요.', 'err'); return; }
     setBusy(btn, true, '원장 만드는 중');
     try {
-      const out = await gas({ action: 'preview', mode: '당월', customerId: ST.cur.id });
+      const out = await gas({ action: 'preview', mode: '당월', customerId: ST.cur.id,
+        force: !!( $('curForce') && $('curForce').checked ) });   // ★ [V10.1] 중복 무시 전달
       if (!out.ok) throw new Error(out.error || '미리보기 실패');
       renderPreview($('curPreviewSlot'), 'msgCur', out, { after: loadRegular });
       showMsg('msgCur', 'PDF를 먼저 확인한 뒤 [회사+거래처 발송]을 누르세요. (아직 발송되지 않았습니다)', 'info');
@@ -1472,7 +1485,8 @@ function initPeriod() {
     try { p = collect(); } catch (e) { showMsg('msgPer', e.message, 'err'); return; }
     setBusy(btn, true, '원장 만드는 중');
     try {
-      const out = await gas(Object.assign({ action: 'preview', mode: '기간' }, p));
+      const out = await gas(Object.assign({ action: 'preview', mode: '기간',
+        force: !!( $('perForce') && $('perForce').checked ) }, p));   // ★ [V10.1] 중복 무시 전달
       if (!out.ok) throw new Error(out.error || '미리보기 실패');
       renderPreview($('perPreviewSlot'), 'msgPer', out, { after: loadRegular });
       showMsg('msgPer', 'PDF를 먼저 확인한 뒤 [회사+거래처 발송]을 누르세요. (아직 발송되지 않았습니다)', 'info');
@@ -1743,7 +1757,7 @@ function initTabs() {
     '발송 이력(실제 나간 것)과 승인 대기(아직 안 나간 것)를 볼 수 있고, <b>[PDF 열기]</b>로 언제든 원본 PDF를 다시 볼 수 있습니다. 삭제 버튼은 이력/대기 항목만 지웁니다(메일 자체는 회수되지 않습니다).',
     '<h2>7. 자주 묻는 질문</h2>',
     '<ul>',
-    '<li><b>"해당 미리보기를 찾을 수 없습니다" 가 나와요</b> — 미리보기를 다시 만든 뒤(토큰 갱신) 발송하세요. V10.0 에서는 토큰이 살짝 어긋나도 자동으로 찾아 발송합니다.</li>',
+    '<li><b>"해당 미리보기를 찾을 수 없습니다" 가 나와요</b> — 미리보기를 다시 만든 뒤(토큰 갱신) 발송하세요. V10.1 에서는 토큰 이름 충돌(웹앱 인증토큰이 미리보기 토큰을 덮어쓰던 문제)을 원천 차단했고, 토큰이 살짝 어긋나도 거래처·원장종류로 자동 찾아 발송합니다. 그래도 나오면 GAS 편집기에서 [배포 → 새 버전 업데이트] 로 최신 코드를 다시 배포하세요.</li>',
     '<li><b>메일이 안 와요</b> — 상단 연결 상태가 「연결됨」인지, 받는사람 이메일이 노션에 정확히 들어가 있는지 확인하세요.</li>',
     '<li><b>기간이 안 보여요</b> — ③ 탭에서 기간 저장 후 노션 체크, 또는 바로 미리보기를 사용하세요.</li>',
     '</ul>'
