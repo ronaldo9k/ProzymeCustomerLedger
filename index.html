@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#070a12">
-<title>거래처 원장 자동화 V10.1</title>
+<title>거래처 원장 자동화 V10.2</title>
 
 <!-- =========================================================
      📱 홈 화면에 앱으로 설치하기 위한 설정 (PWA)
@@ -362,6 +362,27 @@ tr.row-sale td{background:rgba(96,165,250,.07)}
 .delete-one:disabled,.delete-all:disabled{opacity:.45;cursor:not-allowed}
 .item .r{display:flex; align-items:center; gap:6px; flex-shrink:0}
 
+/* ===== 발송 이력 · 검색/선택 도구 (V10.2) ===== */
+.his-tools{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px}
+@media (max-width:780px){ .his-tools{grid-template-columns:repeat(2,minmax(0,1fr))} }
+.his-bar{
+  display:flex; align-items:center; gap:9px; flex-wrap:wrap;
+  padding:10px 12px; margin:0 0 11px;
+  border:1px solid var(--line); border-radius:12px;
+  background:rgba(0,0,0,.22);
+}
+.his-check{display:flex; align-items:center; gap:7px; font-size:12px; font-weight:900;
+  color:#f3f6fb; cursor:pointer; user-select:none}
+.his-check input{accent-color:#c9a227; width:16px; height:16px}
+.his-count{font-size:12px; font-weight:900; color:#fcd34d}
+.his-bar-btns{margin-left:auto; display:flex; gap:7px; flex-wrap:wrap}
+.his-sel{accent-color:#c9a227; width:18px; height:18px; flex-shrink:0; cursor:pointer}
+.item.is-sel{border-color:rgba(201,162,39,.8); background:rgba(201,162,39,.13)}
+.item .nm .tag{font-size:10px; font-weight:800; color:#e2e8f0;
+  background:rgba(148,163,184,.18); padding:2px 7px; border-radius:999px}
+.item .nm .tag.real{background:rgba(52,211,153,.22); color:#6ee7b7}
+.item .nm .tag.none{background:rgba(148,163,184,.18); color:#ffffff}
+
 .pdf-btn{
   display:inline-flex; align-items:center; gap:5px;
   padding:8px 13px; border-radius:10px; text-decoration:none;
@@ -539,7 +560,7 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
           <h1 id="brandTitle">거래처 원장 <em>확인 후 발송</em></h1>
           <p class="brand-sub" id="brandSub">
             <span id="brandName">거래처 원장 자동화</span>
-            <span class="brand-badge"><span class="dot"></span><span id="brandVer">V10.1</span></span>
+            <span class="brand-badge"><span class="dot"></span><span id="brandVer">V10.2</span></span>
           </p>
         </div>
       </div>
@@ -557,6 +578,8 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
       GitHub 에 <code>config.json</code> 이 올라갔는지 확인하세요. (지금은 내장 기본값으로 동작합니다)
     </div>
     <div class="warn hide" id="assetWarn"></div>
+    <!-- ★ [V10.2] 서버(GAS) 배포 버전이 화면과 다르면 여기에 경고가 뜹니다 -->
+    <div class="warn hide" id="buildWarn"></div>
   </header>
 
   <!-- ================= 탭 ================= -->
@@ -719,10 +742,18 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
     <div class="card">
       <h2 class="card-title"><span class="ico">📋</span> 요청 목록 · 발송 이력</h2>
       <p class="card-desc">
-        지금까지 만든 원장과 발송 결과입니다. <b>[PDF 열기]</b>로 언제든 원본을 다시 볼 수 있습니다.
+        <b>실제로 메일이 나간 기록</b>과 <b>아직 안 나간 미리보기</b>를 상태로 구분해서 보여줍니다.
+        <b>[PDF 열기]</b>로 언제든 원본을 다시 볼 수 있습니다.
       </p>
 
-      <div class="grid2" style="margin-bottom:12px">
+      <div class="grid2" style="margin-bottom:10px">
+        <div class="fld" style="margin:0">
+          <label class="f">보기</label>
+          <select id="hisKind">
+            <option value="history">발송 이력 (실제 나간 것)</option>
+            <option value="pending">승인 대기 (아직 안 나간 것)</option>
+          </select>
+        </div>
         <div class="fld" style="margin:0">
           <label class="f">원장 종류</label>
           <select id="hisMode">
@@ -732,29 +763,61 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
             <option value="기간">③ 기간별</option>
           </select>
         </div>
+      </div>
+
+      <!-- ★ [V10.2] 상태 · 날짜 · 검색어 필터 -->
+      <div class="his-tools">
         <div class="fld" style="margin:0">
-          <label class="f">보기</label>
-          <select id="hisKind">
-            <option value="history">발송 이력 (실제 나간 것)</option>
-            <option value="pending">승인 대기 (아직 안 나간 것)</option>
+          <label class="f">상태</label>
+          <select id="hisStatus">
+            <option value="">전체 상태</option>
+            <option value="sent">✅ 발송완료 (실제 발송)</option>
+            <option value="preview">👁 미리보기 (발송 안 함)</option>
+            <option value="failed">⚠ 발송 실패</option>
+            <option value="skipped">⏭ 건너뜀</option>
+            <option value="cancel">🚫 취소</option>
           </select>
+        </div>
+        <div class="fld" style="margin:0">
+          <label class="f">시작일</label>
+          <input type="date" id="hisFrom">
+        </div>
+        <div class="fld" style="margin:0">
+          <label class="f">종료일</label>
+          <input type="date" id="hisTo">
+        </div>
+        <div class="fld" style="margin:0">
+          <label class="f">검색어</label>
+          <input type="text" id="hisQ" placeholder="거래처명 · 받는사람 · PDF">
         </div>
       </div>
 
-      <div class="btns" style="margin-bottom:12px">
-        <button class="btn gold" id="btnHisLoad">불러오기</button>
-        <button class="delete-all" id="btnHisDeleteAll" type="button">표시 항목 삭제</button>
+      <div class="btns" style="margin:12px 0">
+        <button class="btn gold" id="btnHisLoad">🔍 조회</button>
+        <button class="btn ghost sm" id="btnHisToday" type="button">오늘</button>
+        <button class="btn ghost sm" id="btnHisWeek" type="button">최근 7일</button>
+        <button class="btn ghost sm" id="btnHisMonth" type="button">이번 달</button>
+        <button class="btn ghost sm" id="btnHisReset" type="button">초기화</button>
+      </div>
+
+      <div class="his-bar">
+        <label class="his-check"><input type="checkbox" id="hisAll"> 전체 선택</label>
+        <span class="his-count" id="hisCount">표시 0건 · 선택 0건</span>
+        <div class="his-bar-btns">
+          <button class="delete-one" id="btnHisDeleteSel" type="button">✕ 선택 삭제</button>
+          <button class="delete-all" id="btnHisDeleteAll" type="button">전체 삭제</button>
+        </div>
       </div>
 
       <div id="hisList" class="list">
-        <div class="picker-empty">[불러오기]를 누르세요.</div>
+        <div class="picker-empty">[조회]를 누르세요.</div>
       </div>
       <div class="msg" id="msgHis"></div>
     </div>
   </section>
 
   <div class="foot">
-    <b id="footName">푸로찜 총판 · 거래처 원장 자동화 V10.1</b><br>
+    <b id="footName">푸로찜 총판 · 거래처 원장 자동화 V10.2</b><br>
     이 화면은 입력·확인 도구입니다. 실제 계산 · PDF 생성 · 메일 발송은 구글 Apps Script가 처리합니다.
   </div>
 </div>
@@ -787,7 +850,7 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
    ------------------------------------------------------------------ */
 const DEFAULTS = {
   webapp: {
-    url: 'https://script.google.com/macros/s/AKfycbxsx4jyOIoKD3K4IGbUKG6fGgrjCmqddo9NUQn0FAPhj3rQr_JilWk2yK4Xq3AfsRPJ/exec',
+    url: 'https://script.google.com/macros/s/AKfycbw4BmfRLLAgIEDT9Jg_EC5_GgZU06MmuLRy5cw4_O-HpxMe1Be45BRll_skAfsYbzXT/exec',
     token: 'ProzymeCustomerLedger',
     timeoutMs: 60000
   },
@@ -1017,6 +1080,30 @@ async function gas(payload, useGet) {
   }
 }
 
+const EXPECT_BUILD = 'V10.2';
+
+/* ★ [V10.2] 서버(GAS)가 최신 코드로 배포됐는지 확인 — 같은 오류가 반복되는 주범 차단 */
+function checkBuild(out) {
+  const el = $('buildWarn');
+  if (!el) return;
+  const got = String((out && out.build) || '');
+  if (!got) {
+    el.innerHTML = '<b>GAS 서버가 아직 V10.2 로 배포되지 않았습니다.</b> '
+      + '지금 화면은 최신인데 서버는 옛 코드를 실행하고 있습니다. '
+      + 'Apps Script 편집기에서 <b>[배포 → 배포 관리 → ✏ 수정 → 버전: 새 버전 → 배포]</b> '
+      + '를 누른 뒤 이 화면을 새로고침하세요.';
+    el.classList.remove('hide');
+    return;
+  }
+  if (got.indexOf(EXPECT_BUILD) !== 0) {
+    el.innerHTML = '<b>서버 빌드(' + esc(got) + ')와 화면 빌드(' + EXPECT_BUILD + ')가 다릅니다.</b> '
+      + 'GAS 에 최신 Code.gs 를 붙여넣고 [배포 → 새 버전]으로 다시 배포하세요.';
+    el.classList.remove('hide');
+    return;
+  }
+  el.classList.add('hide');
+}
+
 /* 연결 확인 → 상단 상태 알약만 갱신 */
 async function connect(silent) {
   if (!silent) pill('busy', '확인 중…');
@@ -1025,6 +1112,7 @@ async function connect(silent) {
     if (!out.ok) throw new Error(out.error || '연결 실패');
     ST.connected = true;
     pill('ok', '연결됨');
+    checkBuild(out);
     const nx = dots(out.nextRegular) + (out.weekendShift ? ' (금)' : '');
     if ($('nextPill')) $('nextPill').textContent = '다음 정기 ' + nx;
     if ($('regNext')) $('regNext').textContent = dots(out.nextRegular);
@@ -1513,126 +1601,252 @@ function initPeriod() {
   });
 }
 
-/* ------------------------------------------------------------------
-   11. 📋 이력 탭
-   ------------------------------------------------------------------ */
-function statusBadge(text) {
-  const t = String(text || '');
-  if (t.indexOf('성공') === 0) return '<span class="badge b-ok">발송완료</span>';
-  if (t.indexOf('미리보기') === 0) return '<span class="badge b-prev">승인대기</span>';
-  if (t.indexOf('실패') === 0 || t.indexOf('오류') === 0) return '<span class="badge b-err">오류</span>';
-  if (t.indexOf('건너뜀') === 0) return '<span class="badge b-off">건너뜀</span>';
-  return '<span class="badge b-wait">대기</span>';
+function statusBadge(text, key, label) {
+  let k = key;
+  if (!k) {
+    const t = String(text || '');
+    if (t.indexOf('성공') === 0) k = 'sent';
+    else if (t.indexOf('미리보기') === 0) k = 'preview';
+    else if (t.indexOf('실패') === 0 || t.indexOf('오류') === 0) k = 'failed';
+    else if (t.indexOf('취소') >= 0) k = 'cancel';
+    else if (t.indexOf('건너뜀') === 0) k = 'skipped';
+    else k = 'wait';
+  }
+  const map = {
+    sent:    ['b-ok',   '✅ 발송완료'],
+    preview: ['b-prev', '👁 미리보기'],
+    failed:  ['b-err',  '⚠ 실패'],
+    cancel:  ['b-off',  '🚫 취소'],
+    skipped: ['b-off',  '⏭ 건너뜀'],
+    wait:    ['b-wait', '⏳ 대기']
+  };
+  const m = map[k] || map.wait;
+  return '<span class="badge ' + m[0] + '">' + esc(label || m[1]) + '</span>';
 }
-
 let currentHistoryRows = [];
 let currentPendingRows = [];
+let hisSelected = new Set();
+let hisSelectable = [];
+let hisBusy = false;
+
+function hisKindNow() {
+  const el = $('hisKind');
+  return el && el.value === 'pending' ? 'pending' : 'history';
+}
+function hisModeNow() { const el = $('hisMode'); return (el && el.value) || ''; }
+function hisRowKey(r) { return r ? String(r.key || r.token || '') : ''; }
+
+function hisUpdateBar() {
+  const rows = hisKindNow() === 'pending' ? currentPendingRows : currentHistoryRows;
+  const cnt = $('hisCount');
+  if (cnt) cnt.textContent = '표시 ' + rows.length + '건 · 선택 ' + hisSelected.size + '건';
+  const allBox = $('hisAll');
+  if (allBox) {
+    allBox.checked = hisSelectable.length > 0 && hisSelected.size === hisSelectable.length;
+    allBox.indeterminate = hisSelected.size > 0 && hisSelected.size < hisSelectable.length;
+    allBox.disabled = hisSelectable.length === 0;
+  }
+  const selBtn = $('btnHisDeleteSel');
+  if (selBtn) selBtn.disabled = hisSelected.size === 0;
+  const allBtn = $('btnHisDeleteAll');
+  if (allBtn) {
+    allBtn.disabled = rows.length === 0;
+    allBtn.textContent = hisKindNow() === 'pending' ? '승인대기 전체 삭제' : '표시된 이력 전체 삭제';
+  }
+}
+
+function hisItemHtml(r, kind) {
+  const key = hisRowKey(r);
+  const canDel = kind === 'history' ? true : r.canDelete !== false;
+  const on = hisSelected.has(key);
+  const badge = statusBadge(r.result || r.statusLabel || '', r.statusKey, r.statusLabel);
+  const real = r.statusKey === 'sent'
+    ? '<span class="tag real">메일 발송됨</span>'
+    : '<span class="tag none">메일 안 나감</span>';
+  const sub = (kind === 'history')
+    ? esc(r.startIso) + ' ~ ' + esc(r.endIso) + ' · ' + esc(r.at) + '<br>'
+      + '최종 미수 ' + money(r.closing) + ' · 받는사람 ' + esc(r.recipient || '-')
+    : esc(r.mode) + ' · ' + esc(r.startIso) + ' ~ ' + esc(r.endIso) + '<br>'
+      + '최종 미수 ' + money(r.closing) + ' · ' + esc(r.email || '이메일 없음');
+  return '<div class="item' + (on ? ' is-sel' : '') + '" data-key="' + esc(key) + '">'
+    + (canDel ? '<input type="checkbox" class="his-sel" data-sel="' + esc(key) + '"' + (on ? ' checked' : '') + '>'
+              : '<span class="his-sel" style="display:inline-block;opacity:.25"></span>')
+    + '<div class="l">'
+    + '<div class="nm">' + esc(r.name) + ' ' + badge
+    + (kind === 'history' ? ' <span class="badge b-off">' + esc(r.mode) + '</span>' : '') + real + '</div>'
+    + '<div class="sub">' + sub + '</div></div>'
+    + '<div class="r history-actions">'
+    + '<a class="pdf-btn ' + (r.pdfUrl ? '' : 'off') + '" href="' + esc(r.pdfUrl || '#')
+    + '" target="_blank" rel="noopener">📄 PDF 열기</a>'
+    + (canDel ? '<button class="delete-one" type="button" data-del="' + esc(key)
+      + '" title="이 항목만 삭제">✕ 삭제</button>' : '')
+    + '</div></div>';
+}
 
 async function loadHistory() {
   const box = $('hisList');
   if (!box) return;
-  const kind = $('hisKind').value;
-  const mode = $('hisMode').value;
+  const kind = hisKindNow();
+  const mode = hisModeNow();
+  const status = ($('hisStatus') && $('hisStatus').value) || '';
+  const from = ($('hisFrom') && $('hisFrom').value) || '';
+  const to = ($('hisTo') && $('hisTo').value) || '';
+  const q = (($('hisQ') && $('hisQ').value) || '').trim();
+
+  hisSelected = new Set();
   box.innerHTML = '<div class="picker-empty">불러오는 중…</div>';
+  hisUpdateBar();
+
   try {
     if (kind === 'pending') {
-      const out = await gas({ action: 'pending' });
+      const out = await gas({ action: 'pending', mode: mode });
       if (!out.ok) throw new Error(out.error || '불러오기 실패');
-      const rows = (out.rows || []).filter(r => !mode || r.mode === mode);
-      currentPendingRows = rows;
+      currentPendingRows = (out.rows || []);
       currentHistoryRows = [];
-      $('btnHisDeleteAll').textContent = '승인대기 전체 삭제';
-      $('btnHisDeleteAll').disabled = !rows.some(r => r.status === '승인대기');
-      if (!rows.length) {
+      hisSelectable = currentPendingRows.filter(r => r.canDelete !== false).map(hisRowKey);
+      if (!currentPendingRows.length) {
         box.innerHTML = '<div class="picker-empty">승인 대기 중인 원장이 없습니다.</div>';
+        hisUpdateBar();
         return;
       }
-      box.innerHTML = rows.map(r => {
-        const canDelete = r.status === '승인대기';
-        return '<div class="item"><div class="l">'
-        + '<div class="nm">' + esc(r.name) + ' ' + statusBadge(r.status === '승인대기' ? '미리보기' : r.status) + '</div>'
-        + '<div class="sub">' + esc(r.mode) + ' · ' + esc(r.startIso) + ' ~ ' + esc(r.endIso) + '<br>'
-        + '최종 미수 ' + money(r.closing) + ' · ' + esc(r.email || '이메일 없음') + '</div></div>'
-        + '<div class="r history-actions"><a class="pdf-btn ' + (r.pdfUrl ? '' : 'off') + '" href="' + esc(r.pdfUrl || '#') + '" target="_blank" rel="noopener">📄 PDF 열기</a>'
-        + (canDelete ? '<button class="delete-one" type="button" data-delete-pending="' + esc(r.token) + '" title="발송 전 미리보기 삭제">✕ 삭제</button>' : '')
-        + '</div></div>';
-      }).join('');
-      box.querySelectorAll('[data-delete-pending]').forEach(btn => {
-        btn.addEventListener('click', () => deletePendingItems([btn.dataset.deletePending], false));
+      box.innerHTML = currentPendingRows.map(r => hisItemHtml(r, 'pending')).join('');
+    } else {
+      const out = await gas({
+        action: 'history', limit: Number((ST.cfg.ui && ST.cfg.ui.historyLimit) || 800),
+        mode: mode, status: status, fromIso: from, toIso: to, q: q
       });
-      return;
+      if (!out.ok) throw new Error(out.error || '불러오기 실패');
+      currentHistoryRows = out.rows || [];
+      currentPendingRows = [];
+      hisSelectable = currentHistoryRows.map(hisRowKey);
+      if (!currentHistoryRows.length) {
+        box.innerHTML = '<div class="picker-empty">조건에 맞는 발송 이력이 없습니다.</div>';
+        hisUpdateBar();
+        return;
+      }
+      box.innerHTML = currentHistoryRows.map(r => hisItemHtml(r, 'history')).join('');
     }
 
-    const out = await gas({ action: 'history', limit: Number((ST.cfg.ui && ST.cfg.ui.historyLimit) || 80), mode: mode });
-    if (!out.ok) throw new Error(out.error || '불러오기 실패');
-    const rows = out.rows || [];
-    currentHistoryRows = rows;
-    currentPendingRows = [];
-    $('btnHisDeleteAll').textContent = '표시된 발송 이력 삭제';
-    $('btnHisDeleteAll').disabled = !rows.length;
-    if (!rows.length) {
-      box.innerHTML = '<div class="picker-empty">발송 이력이 없습니다.</div>';
-      return;
-    }
-    box.innerHTML = rows.map(r =>
-      '<div class="item"><div class="l">'
-      + '<div class="nm">' + esc(r.name) + ' ' + statusBadge(r.result)
-      + ' <span class="badge b-off">' + esc(r.mode) + '</span></div>'
-      + '<div class="sub">' + esc(r.startIso) + ' ~ ' + esc(r.endIso) + ' · ' + esc(r.at) + '<br>'
-      + '최종 미수 ' + money(r.closing) + ' · 받는사람 ' + esc(r.recipient || '-') + '</div></div>'
-      + '<div class="r history-actions"><a class="pdf-btn ' + (r.pdfUrl ? '' : 'off') + '" href="' + esc(r.pdfUrl || '#') + '" target="_blank" rel="noopener">📄 PDF 열기</a>'
-      + '<button class="delete-one" type="button" data-delete-history="' + Number(r.rowIndex || 0) + '" title="발송 이력 행 삭제">✕ 삭제</button>'
-      + '</div></div>').join('');
-    box.querySelectorAll('[data-delete-history]').forEach(btn => {
-      btn.addEventListener('click', () => deleteHistoryItems([Number(btn.dataset.deleteHistory)], false));
+    // 선택 체크박스
+    box.querySelectorAll('input[data-sel]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const k = cb.dataset.sel;
+        if (cb.checked) hisSelected.add(k); else hisSelected.delete(k);
+        const item = cb.closest('.item');
+        if (item) item.classList.toggle('is-sel', cb.checked);
+        hisUpdateBar();
+      });
     });
+    // 건별 삭제 (이 버튼이 실제로 동작하도록 여기서 직접 연결합니다)
+    box.querySelectorAll('button[data-del]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        hisDelete([btn.dataset.del], false, false);
+      });
+    });
+    hisUpdateBar();
   } catch (e) {
     box.innerHTML = '<div class="picker-empty" style="color:#fca5a5">' + esc(e.message) + '</div>';
+    hisUpdateBar();
   }
 }
 
+/* 선택/전체/건별 삭제를 한 곳에서 처리 */
+async function hisDelete(keys, all, bulk) {
+  if (hisBusy) return;
+  const kind = hisKindNow();
+  const list = [...new Set((keys || []).map(String).filter(Boolean))];
+  if (!all && !list.length) return;
+
+  const n = all ? (kind === 'pending' ? hisSelectable.length : currentHistoryRows.length) : list.length;
+  if (!n) { showMsg('msgHis', '삭제할 항목이 없습니다.', 'err'); return; }
+
+  const promptText = all
+    ? (kind === 'pending'
+        ? '표시된 승인대기 미리보기 ' + n + '건을 모두 삭제할까요?\\n\\n아직 발송되지 않은 항목만 삭제됩니다.'
+        : '표시된 발송 이력 ' + n + '건을 모두 삭제할까요?\\n\\n이력 기록만 지워지며, 실제 메일과 PDF 파일은 그대로 남습니다.')
+    : (kind === 'pending'
+        ? '선택한 승인대기 미리보기 ' + n + '건을 삭제할까요?\\n\\n메일은 발송되지 않습니다.'
+        : '선택한 발송 이력 ' + n + '건을 삭제할까요?\\n\\n이력 기록만 지워지며, 실제 메일과 PDF 파일은 그대로 남습니다.');
+  if (!confirm(promptText)) return;
+
+  hisBusy = true;
+  const btn = $('btnHisDeleteAll');
+  if (btn) btn.disabled = true;
+  try {
+    let out;
+    if (kind === 'pending') {
+      out = await gas({ action: 'deletePending', tokens: all ? [] : list, all: !!all, mode: hisModeNow() });
+    } else {
+      out = await gas({ action: 'deleteHistory', keys: all ? [] : list, all: !!all });
+    }
+    if (!out.ok) throw new Error(out.error || '삭제 실패');
+    showMsg('msgHis', '✅ ' + (out.message || ('삭제 ' + (out.deleted || 0) + '건')), 'ok');
+    await loadHistory();
+  } catch (e) {
+    showMsg('msgHis', '⚠ ' + e.message, 'err');
+  } finally {
+    hisBusy = false;
+    hisUpdateBar();
+  }
+}
+
+function hisRange(kind) {
+  const t = new Date();
+  const iso = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+    + '-' + String(d.getDate()).padStart(2, '0');
+  if (kind === 'today') { if ($('hisFrom')) $('hisFrom').value = iso(t); if ($('hisTo')) $('hisTo').value = iso(t); }
+  else if (kind === 'week') {
+    const f = new Date(t.getTime() - 6 * 86400000);
+    if ($('hisFrom')) $('hisFrom').value = iso(f);
+    if ($('hisTo')) $('hisTo').value = iso(t);
+  } else if (kind === 'month') {
+    const f = new Date(t.getFullYear(), t.getMonth(), 1);
+    if ($('hisFrom')) $('hisFrom').value = iso(f);
+    if ($('hisTo')) $('hisTo').value = iso(t);
+  } else {
+    if ($('hisFrom')) $('hisFrom').value = '';
+    if ($('hisTo')) $('hisTo').value = '';
+    if ($('hisQ')) $('hisQ').value = '';
+    if ($('hisStatus')) $('hisStatus').value = '';
+    if ($('hisMode')) $('hisMode').value = '';
+  }
+  loadHistory();
+}
+
+function initHistory() {
+  const on = (id, ev, fn) => { const el = $(id); if (el) el.addEventListener(ev, fn); };
+  on('btnHisLoad', 'click', loadHistory);
+  ['hisKind', 'hisMode', 'hisStatus'].forEach(id => on(id, 'change', loadHistory));
+  ['hisFrom', 'hisTo'].forEach(id => on(id, 'change', loadHistory));
+  const q = $('hisQ');
+  if (q) q.addEventListener('keydown', (e) => { if (e.key === 'Enter') loadHistory(); });
+
+  on('btnHisToday', 'click', () => hisRange('today'));
+  on('btnHisWeek', 'click', () => hisRange('week'));
+  on('btnHisMonth', 'click', () => hisRange('month'));
+  on('btnHisReset', 'click', () => hisRange('reset'));
+
+  const all = $('hisAll');
+  if (all) all.addEventListener('change', () => {
+    hisSelected = new Set(all.checked ? hisSelectable : []);
+    const box = $('hisList');
+    if (box) {
+      box.querySelectorAll('input[data-sel]').forEach(cb => { cb.checked = all.checked; });
+      box.querySelectorAll('.item').forEach(it => it.classList.toggle('is-sel', all.checked));
+    }
+    hisUpdateBar();
+  });
+
+  on('btnHisDeleteSel', 'click', () => hisDelete([...hisSelected], false, true));
+  on('btnHisDeleteAll', 'click', () => hisDelete([], true, true));
+  hisUpdateBar();
+}
 async function deletePendingItems(tokens, bulk) {
-  const uniqueTokens = [...new Set((tokens || []).filter(Boolean))];
-  if (!uniqueTokens.length) return;
-  const prompt = bulk
-    ? '현재 선택된 원장 종류에 표시된 승인대기 미리보기 ' + uniqueTokens.length + '건을 삭제할까요?\n\n아직 발송되지 않은 승인대기 항목만 삭제됩니다.'
-    : '이 승인대기 미리보기를 삭제할까요?\n\n메일은 발송되지 않으며, 해당 대기 항목만 삭제됩니다.';
-  if (!confirm(prompt)) return;
-  const btn = $('btnHisDeleteAll');
-  if (btn) { btn.disabled = true; btn.textContent = '삭제 중…'; }
-  try {
-    const out = await gas({ action: 'deletePending', tokens: uniqueTokens });
-    if (!out.ok) throw new Error(out.error || '승인대기 삭제 실패');
-    showMsg('msgHis', '승인대기 삭제 ' + (out.deleted || 0) + '건' + (out.skipped ? ' · 보호/건너뜀 ' + out.skipped + '건' : ''), 'ok');
-    await loadHistory();
-  } catch (e) {
-    showMsg('msgHis', e.message, 'err');
-  } finally {
-    if (btn) { btn.disabled = false; }
-  }
+  return hisDelete(tokens, false, !!bulk);
 }
-
-async function deleteHistoryItems(rowIndexes, bulk) {
-  const rows = [...new Set((rowIndexes || []).map(Number).filter(n => Number.isInteger(n) && n > 1))];
-  if (!rows.length) return;
-  const prompt = bulk
-    ? '현재 화면에 표시된 발송 이력 ' + rows.length + '건을 실행 로그 시트에서 삭제할까요?\n\n이 작업은 실제 발송 이력 기록을 삭제하며 되돌릴 수 없습니다. PDF 파일과 메일은 삭제되지 않습니다.'
-    : '이 발송 이력 기록을 실행 로그 시트에서 삭제할까요?\n\n실제 메일과 PDF 파일은 삭제되지 않지만, 이력 기록은 되돌릴 수 없습니다.';
-  if (!confirm(prompt)) return;
-  const btn = $('btnHisDeleteAll');
-  if (btn) { btn.disabled = true; btn.textContent = '삭제 중…'; }
-  try {
-    const out = await gas({ action: 'deleteHistory', rowIndexes: rows });
-    if (!out.ok) throw new Error(out.error || '발송 이력 삭제 실패');
-    showMsg('msgHis', '발송 이력 기록 삭제 ' + (out.deleted || 0) + '건', 'ok');
-    await loadHistory();
-  } catch (e) {
-    showMsg('msgHis', e.message, 'err');
-  } finally {
-    if (btn) { btn.disabled = false; }
-  }
+async function deleteHistoryItems(keys, bulk) {
+  return hisDelete(keys, false, !!bulk);
 }
-
 /* ------------------------------------------------------------------
    12. 탭 전환
    ------------------------------------------------------------------ */
@@ -1668,16 +1882,8 @@ function initTabs() {
   }
 
   $('btnRegReload').addEventListener('click', loadRegular);
-  $('btnHisLoad').addEventListener('click', loadHistory);
-  $('btnHisDeleteAll').addEventListener('click', () => {
-    if ($('hisKind').value === 'pending') {
-      deletePendingItems(currentPendingRows.filter(r => r.status === '승인대기').map(r => r.token), true);
-    } else {
-      deleteHistoryItems(currentHistoryRows.map(r => Number(r.rowIndex || 0)), true);
-    }
-  });
-  $('hisKind').addEventListener('change', loadHistory);
-  $('hisMode').addEventListener('change', loadHistory);
+  // ★ [V10.2] 발송 이력 탭 : 검색·날짜·선택삭제·전체삭제 연결을 한 곳에서 처리
+  initHistory();
 
   /* 수동 실행(재발송용) — 접힌 영역 안에만 존재 */
   if ($('btnRegRun')) {
@@ -1819,6 +2025,7 @@ function initTabs() {
 })();
 
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
