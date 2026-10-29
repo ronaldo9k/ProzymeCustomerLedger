@@ -352,6 +352,16 @@ tr.row-sale td{background:rgba(96,165,250,.07)}
 .item .nm{font-size:13px; font-weight:900; display:flex; align-items:center; gap:7px; flex-wrap:wrap}
 .item .sub{font-size:11px; color:var(--muted); margin-top:3px; line-height:1.5}
 .history-actions{display:flex; align-items:center; gap:7px; flex-wrap:wrap}
+/* ===== ★ [V10.4] 발송이력 모바일 2열 레이아웃 =====
+   모바일(780px 이하)에서는 정보(.l) 와 버튼들(.history-actions)이 좌우 2열로 배치되고,
+   버튼들은 오른쪽에서 위아래로 쌓입니다 → 왼쪽 정보 폭이 넓어져 리스트가 안 길어집니다. */
+@media (max-width:780px){
+  #hisList .item{flex-wrap:nowrap; align-items:stretch; gap:8px}
+  #hisList .item .l{flex:1 1 auto; min-width:0}
+  #hisList .item .r.history-actions{flex-direction:column; align-items:stretch; justify-content:center; flex:0 0 auto}
+  #hisList .item .r.history-actions .pdf-btn,
+  #hisList .item .r.history-actions .delete-one{justify-content:center; text-align:center}
+}
 .delete-one,.delete-all{
   cursor:pointer; border:1px solid rgba(248,113,113,.58); border-radius:9px;
   background:rgba(127,29,29,.32); color:#fecaca; font-family:inherit;
@@ -850,7 +860,7 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
    ------------------------------------------------------------------ */
 const DEFAULTS = {
   webapp: {
-    url: 'https://script.google.com/macros/s/AKfycbxOk-QpazF5WTUBBgr3maU1ihToZ1sMowHATE6yhN1RcOwCRx9ycf-IpjCnpa3hpg-Q/exec',
+    url: 'https://script.google.com/macros/s/AKfycbytrygwf2_ggWqnxzxCRvRNJ_AcSOwqxRUCc__QE0vL7-O4dgCdJVa1Bh3ck_UyEXvi/exec',
     token: 'ProzymeCustomerLedger',
     timeoutMs: 60000
   },
@@ -1663,10 +1673,30 @@ function hisItemHtml(r, kind) {
   const real = r.statusKey === 'sent'
     ? '<span class="tag real">메일 발송됨</span>'
     : '<span class="tag none">메일 안 나감</span>';
+  /* ★ [V10.4] 날짜 표기 단축 : "Fri Sep 11 2026 ..." 같은 긴 영문 날짜를 "26-09-11" 로 변환.
+     안전 파서라 Date 객체/영문 문자열/이미 ISO(26-10-01 형태) 어느 것이 와도 살아나고,
+     살아나지 못하면 원래 문자열을 그대로 보여줍니다(기존 기록 호환). */
+  const sShort = (iso) => {
+    if (!iso) return '-';
+    let m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return m[1].slice(2) + '-' + m[2] + '-' + m[3];
+    m = String(iso).match(/^(\w{3})\s+(\w{3})\s+(\d{1,2})\s+.*?(\d{4})/);
+    if (m) {
+      const MON = { Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12' };
+      const mm = MON[m[2]];
+      if (mm) return m[4].slice(2) + '-' + mm + '-' + String(m[3]).padStart(2, '0');
+    }
+    const d = new Date(iso);
+    if (!isNaN(d.getTime())) {
+      return String(d.getFullYear()).slice(2) + '-'
+        + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    return String(iso);
+  };
   const sub = (kind === 'history')
-    ? esc(r.startIso) + ' ~ ' + esc(r.endIso) + ' · ' + esc(r.at) + '<br>'
+    ? sShort(r.startIso) + ' ~ ' + sShort(r.endIso) + ' · ' + esc(r.at) + '<br>'
       + '최종 미수 ' + money(r.closing) + ' · 받는사람 ' + esc(r.recipient || '-')
-    : esc(r.mode) + ' · ' + esc(r.startIso) + ' ~ ' + esc(r.endIso) + '<br>'
+    : esc(r.mode) + ' · ' + sShort(r.startIso) + ' ~ ' + sShort(r.endIso) + '<br>'
       + '최종 미수 ' + money(r.closing) + ' · ' + esc(r.email || '이메일 없음');
   return '<div class="item' + (on ? ' is-sel' : '') + '" data-key="' + esc(key) + '">'
     + (canDel ? '<input type="checkbox" class="his-sel" data-sel="' + esc(key) + '"' + (on ? ' checked' : '') + '>'
@@ -1960,7 +1990,7 @@ function initTabs() {
     '<li>값을 비우면 기존대로 말일(주말이면 직전 금요일)에 발송</li>',
     '</ol>',
     '<h2>6. 📋 발송 이력</h2>',
-    '발송 이력(실제 나간 것)과 승인 대기(아직 안 나간 것)를 볼 수 있고, <b>[PDF 열기]</b>로 언제든 원본 PDF를 다시 볼 수 있습니다. 삭제 버튼은 이력/대기 항목만 지웁니다(메일 자체는 회수되지 않습니다).',
+    '발송 이력(실제 나간 것)과 승인 대기(아직 안 나간 것)를 볼 수 있고, <b>[PDF 열기]</b>로 언제든 원본 PDF를 다시 볼 수 있습니다. 삭제 버튼은 이력/대기 항목만 지웁니다(메일 자체는 회수되지 않습니다). <b>[V10.4]</b> 모바일에서는 정보(왼쪽) + PDF열기/삭제 버튼(오른쪽 위아래) 2열 배치로 바뀌어 리스트가 안 길어지고, 기간 표기도 <b>26-10-01 ~ 26-10-28</b> 처럼 짧아졌습니다.',
     '<h2>7. 자주 묻는 질문</h2>',
     '<ul>',
     '<li><b>"해당 미리보기를 찾을 수 없습니다" 가 나와요</b> — 미리보기를 다시 만든 뒤(토큰 갱신) 발송하세요. V10.1 에서는 토큰 이름 충돌(웹앱 인증토큰이 미리보기 토큰을 덮어쓰던 문제)을 원천 차단했고, 토큰이 살짝 어긋나도 거래처·원장종류로 자동 찾아 발송합니다. 그래도 나오면 GAS 편집기에서 [배포 → 새 버전 업데이트] 로 최신 코드를 다시 배포하세요.</li>',
