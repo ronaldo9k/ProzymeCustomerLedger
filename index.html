@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#070a12">
-<title>거래처 원장 자동화 V10.5</title>
+<title>거래처 원장 자동화 V10.6</title>
 
 <!-- =========================================================
      📱 홈 화면에 앱으로 설치하기 위한 설정 (PWA)
@@ -419,6 +419,22 @@ tr.row-sale td{background:rgba(96,165,250,.07)}
 .chk .nm{font-size:12.5px; font-weight:800; flex:1; min-width:0}
 .chk .meta{font-size:10.5px; color:var(--muted)}
 
+/* ★ [V10.6] ① 정기 수동 발송 — 거래처별 개별 선택 도구 */
+.chk.pick{cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent; transition:.14s}
+.chk.pick:active{transform:scale(.995)}
+.chk.pick:not(.on){opacity:.55}
+.chk.pick:not(.on) .box{color:transparent; background:transparent}
+.selbar{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:8px 11px; margin-bottom:9px; border-radius:10px;
+  border:1px dashed var(--line2); background:rgba(0,0,0,.20);
+  font-size:11.5px; color:var(--ink-dim);
+}
+.selbar .selall{display:flex; align-items:center; gap:6px; font-weight:800; color:#f3f6fb; cursor:pointer}
+.selbar .selall input{width:16px; height:16px; accent-color:#c9a227}
+.selbar .selcnt{margin-left:auto}
+.selbar .selcnt b{color:var(--gold-lt); font-size:12.5px}
+
 /* 메시지 */
 .msg{
   margin-top:11px; padding:11px 13px; border-radius:11px;
@@ -570,7 +586,7 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
           <h1 id="brandTitle">거래처 원장 <em>확인 후 발송</em></h1>
           <p class="brand-sub" id="brandSub">
             <span id="brandName">거래처 원장 자동화</span>
-            <span class="brand-badge"><span class="dot"></span><span id="brandVer">V10.5</span></span>
+            <span class="brand-badge"><span class="dot"></span><span id="brandVer">V10.6</span></span>
           </p>
         </div>
       </div>
@@ -624,6 +640,13 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
         <button class="btn sm ghost" id="btnRegReload">새로고침</button>
       </div>
 
+      <!-- ★ [V10.6] 수동 발송용 개별 선택 도구 (목록 항목을 눌러도 체크/해제됩니다) -->
+      <div class="selbar" id="regSelBar">
+        <label class="selall"><input type="checkbox" id="regSelAll" checked> 전체 선택</label>
+        <span class="selcnt">선택 <b id="regSelCount">0</b>곳</span>
+        <button class="btn sm ghost" id="btnRegSelNone" type="button">전체 해제</button>
+      </div>
+
       <div id="regList" class="list">
         <div class="picker-empty">불러오는 중…</div>
       </div>
@@ -637,10 +660,12 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
           <div class="note" style="margin-bottom:11px">
             정상 발송은 <b>말일 오전 9시 자동</b>입니다. 아래 버튼은
             <b>① 자동 발송이 실패했을 때 ② 말일 이후에 새 거래처를 추가했을 때</b>
-            쓰는 <b>재발송 버튼</b>입니다. 체크된 모든 거래처에 <b>지금 즉시</b> 발송됩니다.
+            쓰는 <b>재발송 버튼</b>입니다.
+            <br><b>[V10.6]</b> 위 <b>발송 대상</b> 목록의 거래처를 <b>하나씩 눌러 체크</b>하면
+            <b>체크된 거래처에만</b> 지금 즉시 발송됩니다. (처음에는 전체가 체크되어 있습니다)
           </div>
           <div class="btns">
-            <button class="btn" id="btnRegRun">정기 원장 지금 수동 발송</button>
+            <button class="btn" id="btnRegRun">선택한 거래처에 지금 수동 발송</button>
           </div>
         </div>
       </details>
@@ -655,6 +680,7 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
       <h2 class="card-title"><span class="ico">②</span> 당월 거래처원장</h2>
       <p class="card-desc">
         <b>이번 달 1일 ~ 오늘</b>까지의 원장입니다. 거래처를 골라 <b>[미리보기]</b>로 PDF를 확인한 뒤 발송하세요.
+        <br><b>[V10.6]</b> ② 당월 원장은 중간에 거래가 없어도 <b>기간 시작일이 언제나 당월 1일</b>로 고정됩니다.
       </p>
 
       <div class="fld">
@@ -828,7 +854,7 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
   </section>
 
   <div class="foot">
-    <b id="footName">푸로찜 총판 · 거래처 원장 자동화 V10.5</b><br>
+    <b id="footName">푸로찜 총판 · 거래처 원장 자동화 V10.6</b><br>
     이 화면은 입력·확인 도구입니다. 실제 계산 · PDF 생성 · 메일 발송은 구글 Apps Script가 처리합니다.
   </div>
 </div>
@@ -861,7 +887,7 @@ details.setup{ background:rgba(0,0,0,.20); backdrop-filter:blur(5px) }
    ------------------------------------------------------------------ */
 const DEFAULTS = {
   webapp: {
-    url: 'https://script.google.com/macros/s/AKfycbylyQO__vR0B1LcfeUcVu9XUlhHL9Ao7-pt-mbTW2Sh1RcEedf2A8F2TiP0daCJZK8/exec',
+    url: 'https://script.google.com/macros/s/AKfycbxe9XzCbVSFMgX_vl2HxPbDY2hvoZIyfqmQiacjapdQnq98qSVN5n4eFKb2ET-9d8Vg/exec',
     token: 'ProzymeCustomerLedger',
     timeoutMs: 60000
   },
@@ -872,7 +898,7 @@ const DEFAULTS = {
     backgroundPosition: 'center 26%'
   },
   brand: {
-    appName: '거래처 원장 자동화', version: 'V10.5', fallbackInitial: 'PZ',
+    appName: '거래처 원장 자동화', version: 'V10.6', fallbackInitial: 'PZ',
     title: '거래처 원장', titleAccent: '확인 후 발송',
     subtitle: 'PDF로 먼저 확인 → 회사·거래처 동시 발송',
     footer: '푸로찜 총판 · 거래처 원장 자동화'
@@ -891,6 +917,7 @@ const ST = {
   url: '', token: '',
   customers: [],
   cur: null, per: null,
+  regSel: {},        /* ★ [V10.6] ① 정기 수동 발송 — 거래처별 선택 상태 (id → true/false) */
   connected: false,
   cfgMissing: false
 };
@@ -1091,7 +1118,7 @@ async function gas(payload, useGet) {
   }
 }
 
-const EXPECT_BUILD = 'V10.5';
+const EXPECT_BUILD = 'V10.6';
 
 /* ★ [V10.5] 서버(GAS)가 최신 코드로 배포됐는지 확인 — 같은 오류가 반복되는 주범 차단 */
 function checkBuild(out) {
@@ -1099,7 +1126,7 @@ function checkBuild(out) {
   if (!el) return;
   const got = String((out && out.build) || '');
   if (!got) {
-    el.innerHTML = '<b>GAS 서버가 아직 V10.5 로 배포되지 않았습니다.</b> '
+    el.innerHTML = '<b>GAS 서버가 아직 V10.6 으로 배포되지 않았습니다.</b> '
       + '지금 화면은 최신인데 서버는 옛 코드를 실행하고 있습니다. '
       + 'Apps Script 편집기에서 <b>[배포 → 배포 관리 → ✏ 수정 → 버전: 새 버전 → 배포]</b> '
       + '를 누른 뒤 이 화면을 새로고침하세요.';
@@ -1439,6 +1466,19 @@ function renderPreview(slotEl, msgId, d, ctx) {
 /* ------------------------------------------------------------------
    8. ① 정기 탭
    ------------------------------------------------------------------ */
+/* ★ [V10.6] 체크된 거래처 ID 목록 */
+function regSelectedIds() {
+  const m = ST.regSel || {};
+  return Object.keys(m).filter(k => !!m[k]);
+}
+/* ★ [V10.6] 선택 개수 + 전체선택 체크 상태 갱신 */
+function updateRegSelCount() {
+  const n = regSelectedIds().length;
+  const total = Number(($('regCount') || {}).textContent || 0);
+  if ($('regSelCount')) $('regSelCount').textContent = n;
+  if ($('regSelAll')) $('regSelAll').checked = (n > 0 && n === total);
+}
+
 async function loadRegular() {
   const box = $('regList');
   box.innerHTML = '<div class="picker-empty">불러오는 중…</div>';
@@ -1457,23 +1497,38 @@ async function loadRegular() {
 
     const list = sortByName(d.list || []);
     if ($('regCount')) $('regCount').textContent = list.length;
+    if ($('regSelBar')) $('regSelBar').classList.toggle('hide', !list.length);
     if (!list.length) {
+      ST.regSel = {};
+      updateRegSelCount();
       box.innerHTML = '<div class="picker-empty">노션에서 「정기 거래처원장」이 체크된 거래처가 없습니다.</div>';
       return;
     }
+    /* ★ [V10.6] 새로 불러올 때는 전체 체크 상태로 시작 (기존 "전체 발송" 동작과 동일) */
+    ST.regSel = {};
+    list.forEach(c => { ST.regSel[c.id] = true; });
     box.innerHTML = list.map(c => {
       const ct = contactOf(c);
       const dayTxt = (c.regularDay && c.regularDay > 0)
         ? '매월 ' + c.regularDay + '일 발송' : '말일 자동';
       const meta = [ct.email || '이메일 없음', dayTxt,
         c.lastSent ? '최근 발송 ' + c.lastSent : '발송 이력 없음'];
-      return '<div class="chk on">'
+      return '<div class="chk on pick" data-regid="' + esc(c.id) + '">'
         + '<div class="box">✓</div>'
         + '<div style="flex:1;min-width:0">'
         +   '<div class="nm">' + esc(c.name) + '</div>'
         +   '<div class="meta">' + esc(meta.join(' · ')) + '</div>'
         + '</div></div>';
     }).join('');
+    box.querySelectorAll('[data-regid]').forEach(el => {
+      el.addEventListener('click', () => {
+        const id = el.dataset.regid;
+        ST.regSel[id] = !ST.regSel[id];
+        el.classList.toggle('on', !!ST.regSel[id]);
+        updateRegSelCount();
+      });
+    });
+    updateRegSelCount();
   } catch (e) {
     box.innerHTML = '<div class="picker-empty" style="color:#fca5a5">' + esc(e.message) + '</div>';
   }
@@ -1913,6 +1968,23 @@ function initTabs() {
   }
 
   $('btnRegReload').addEventListener('click', loadRegular);
+
+  /* ★ [V10.6] ① 정기 수동 발송 — 전체 선택 / 전체 해제 */
+  if ($('regSelAll')) {
+    $('regSelAll').addEventListener('change', () => {
+      const on = !!$('regSelAll').checked;
+      Object.keys(ST.regSel || {}).forEach(k => { ST.regSel[k] = on; });
+      $$('#regList [data-regid]').forEach(el => el.classList.toggle('on', on));
+      updateRegSelCount();
+    });
+  }
+  if ($('btnRegSelNone')) {
+    $('btnRegSelNone').addEventListener('click', () => {
+      Object.keys(ST.regSel || {}).forEach(k => { ST.regSel[k] = false; });
+      $$('#regList [data-regid]').forEach(el => el.classList.remove('on'));
+      updateRegSelCount();
+    });
+  }
   // ★ [V10.5] 발송 이력 탭 : 검색·날짜·선택삭제·전체삭제 연결을 한 곳에서 처리
   initHistory();
 
@@ -1920,10 +1992,17 @@ function initTabs() {
   if ($('btnRegRun')) {
     $('btnRegRun').addEventListener('click', async () => {
       const btn = $('btnRegRun');
-      if (!confirm('정기 원장을 지금 수동으로 발송할까요?\n\n· 정상 발송은 매월 말일 오전 9시에 자동으로 나갑니다.\n· 이 버튼은 "자동 발송을 놓쳤을 때" 또는 "새 거래처를 추가했을 때" 쓰는 재발송 버튼입니다.\n· 체크된 모든 거래처에 지금 즉시 나갑니다.')) return;
+      /* ★ [V10.6] 체크된 거래처만 발송 — 0곳이면 실행하지 않음 */
+      const ids = regSelectedIds();
+      if (!ids.length) {
+        showMsg('msgReg', '발송할 거래처를 목록에서 1곳 이상 체크하세요.\n(목록 항목을 누르면 체크/해제됩니다)', 'err');
+        return;
+      }
+      const total = Number(($('regCount') || {}).textContent || 0) || ids.length;
+      if (!confirm('정기 원장을 지금 수동으로 발송할까요?\n\n· 정상 발송은 매월 말일 오전 9시에 자동으로 나갑니다.\n· 이 버튼은 "자동 발송을 놓쳤을 때" 또는 "새 거래처를 추가했을 때" 쓰는 재발송 버튼입니다.\n· 체크된 ' + ids.length + '곳' + (ids.length < total ? ' (전체 ' + total + '곳 중 선택)' : '') + '에 지금 즉시 나갑니다.')) return;
       setBusy(btn, true, '실행 중');
       try {
-        const out = await gas({ action: 'runRegular' });
+        const out = await gas({ action: 'runRegular', customerIds: ids });
         if (!out.ok) throw new Error(out.error || '실행 실패');
         showMsg('msgReg', out.summary || '실행 완료', out.failed ? 'err' : 'ok');
         loadRegular();
@@ -1958,7 +2037,7 @@ function initTabs() {
     '<b>회사 + 거래처</b>에 동시에 메일 발송해 주는 시스템입니다. 원장 3종이 있습니다.',
     '<ul>',
     '<li><b>① 정기 원장</b> — 매월 말일(주말이면 직전 금요일) 오전 9시 자동 발송. 노션 「정기 거래처원장」 체크 거래처 대상. 「정기 발송일」 지정 거래처는 지정일 오전 9시에 발송되고 말일 자동 발송에서는 제외됩니다. 원장 기간은 언제나 <b>당월 1일 ~ 말일</b> 고정입니다.</li>',
-    '<li><b>② 당월 원장</b> — 이번 달 1일 ~ 오늘까지 원장. 노션 「당월 거래처원장」 체크 또는 웹앱에서 실행.</li>',
+    '<li><b>② 당월 원장</b> — 이번 달 1일 ~ 오늘까지 원장. 노션 「당월 거래처원장」 체크 또는 웹앱에서 실행. <b>시작일은 언제나 당월 1일 고정</b>입니다(V10.6).</li>',
     '<li><b>③ 기간별 원장</b> — 원하는 시작일~종료일 직접 지정해서 발송.</li>',
     '</ul>',
     '<h2>2. 공통 사용 순서 (②③ 기준)</h2>',
@@ -1999,6 +2078,21 @@ function initTabs() {
     '<li>지난달까지 생긴 미수금은 원장 맨 위 <b>「과거 미수 [전월 말일 기준]」</b> 기준행 1줄로 정확히 표시됩니다 → 기간을 당월 1일부터 잘라도 금액 빈틘이 없습니다.</li>',
     '<li>예: 전월 25일 발송분 = 전월 25일까지 거래 / 이번 11월 원장 = 11.01. 기준 미수금에서 이어짐</li>',
     '</ul>',
+    '<h2>7-1. 📆 ② 당월 원장의 기간 규칙 (V10.6 신규)</h2>',
+    '② 당월 원장은 <b>기간 시작일이 언제나 당월 1일</b>입니다. 중간에 거래가 없어도 1일부터 보여줍니다.',
+    '<ul>',
+    '<li>예: 11월 1일 기준 미수금 0원이고 11월 15일에 첫 납품 → 원장 기간은 <b>11.01 ~ 11.15</b>, 첫 줄은 <b>11.01 미수금 0원</b> 기준행.</li>',
+    '<li>③ 기간별 원장과의 결정적 차이 : ③은 내가 고른 날짜부터, ②는 무조건 그 달 1일부터.</li>',
+    '<li>지난달까지의 미수금은 <b>「과거 미수 [전월 말일 기준]」</b> 기준행 1줄로 표시됩니다 → 금액 빈틈 없음.</li>',
+    '</ul>',
+    '<h2>7-2. ⚙️ ① 정기 원장 수동 발송 — 거래처별 선택 발송 (V10.6 신규)</h2>',
+    '① 정기 탭의 <b>[⚙️ 수동 발송]</b> 은 자동 발송을 놓쳤거나 말일 이후 새 거래처를 추가했을 때 쓰는 재발송 기능입니다.',
+    '<ol>',
+    '<li><b>[발송 대상]</b> 목록의 거래처 항목을 <b>한 번 누르면 체크 해제</b>, 다시 누르면 체크가 됩니다. (처음에는 전체 체크)</li>',
+    '<li><b>[전체 선택]</b> 체크박스 또는 <b>[전체 해제]</b> 버튼으로 한 번에 바꿀 수 있습니다.</li>',
+    '<li>선택한 곳 수가 <b>선택 N곳</b> 으로 표시됩니다.</li>',
+    '<li><b>[선택한 거래처에 지금 수동 발송]</b> 을 누르면 <b>체크된 거래처에만</b> 발송됩니다. 0곳이면 발송되지 않습니다.</li>',
+    '</ol>',
     '<h2>8. 자주 묻는 질문</h2>',
     '<ul>',
     '<li><b>"해당 미리보기를 찾을 수 없습니다" 가 나와요</b> — 미리보기를 다시 만든 뒤(토큰 갱신) 발송하세요. V10.1 에서는 토큰 이름 충돌(웹앱 인증토큰이 미리보기 토큰을 덮어쓰던 문제)을 원천 차단했고, 토큰이 살짝 어긋나도 거래처·원장종류로 자동 찾아 발송합니다. 그래도 나오면 GAS 편집기에서 [배포 → 새 버전 업데이트] 로 최신 코드를 다시 배포하세요.</li>',
